@@ -40,6 +40,12 @@ DEFAULT_REQUIRED_BY_KIND = {
     "other": tuple(),
 }
 
+TOKEN_ENV_NAMES = (
+    "HF_TOKEN",
+    "HUGGING_FACE_TOKEN",
+    "HUGGING_FACE_HUB_TOKEN",
+)
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -61,8 +67,20 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--token",
-        default=os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN"),
-        help="Hugging Face token. Defaults to HF_TOKEN or HUGGING_FACE_HUB_TOKEN.",
+        default=None,
+        help=(
+            "Hugging Face token. Defaults to the first available value from "
+            "HF_TOKEN, HUGGING_FACE_TOKEN, HUGGING_FACE_HUB_TOKEN, or a local .env file."
+        ),
+    )
+    parser.add_argument(
+        "--env-file",
+        default=None,
+        help=(
+            "Optional dotenv file to load before resolving the token. "
+            "If omitted, the script auto-discovers .env in the current working directory "
+            "and repo root."
+        ),
     )
     parser.add_argument(
         "--private",
@@ -129,6 +147,67 @@ def unique(items: Iterable[str]) -> list[str]:
     return ordered
 
 
+def parse_dotenv_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export ") :].strip()
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            continue
+        if value and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        values[key] = value
+    return values
+
+
+def candidate_env_files(explicit_env_file: str | None) -> list[Path]:
+    if explicit_env_file:
+        return [Path(explicit_env_file).resolve()]
+
+    repo_root = Path(__file__).resolve().parent.parent
+    candidates = [
+        Path.cwd() / ".env",
+        repo_root / ".env",
+    ]
+    ordered: list[Path] = []
+    seen: set[Path] = set()
+    for candidate in candidates:
+        resolved = candidate.resolve()
+        if resolved.exists() and resolved not in seen:
+            seen.add(resolved)
+            ordered.append(resolved)
+    return ordered
+
+
+def resolve_token(
+    cli_token: str | None, env_file: str | None
+) -> tuple[str | None, str]:
+    if cli_token:
+        return cli_token, "cli"
+
+    for env_name in TOKEN_ENV_NAMES:
+        value = os.environ.get(env_name)
+        if value:
+            return value, f"env:{env_name}"
+
+    for dotenv_path in candidate_env_files(env_file):
+        values = parse_dotenv_file(dotenv_path)
+        for env_name in TOKEN_ENV_NAMES:
+            value = values.get(env_name)
+            if value:
+                return value, f"dotenv:{dotenv_path.name}:{env_name}"
+
+    return None, "missing"
+
+
 def main() -> None:
     args = parse_args()
     local_dir = Path(args.local_dir).resolve()
@@ -139,10 +218,12 @@ def main() -> None:
     commit_message = args.commit_message or build_commit_message(
         args.repo_type, args.release_kind
     )
+    token, token_source = resolve_token(args.token, args.env_file)
 
-    if not args.token and not args.dry_run:
+    if not token and not args.dry_run:
         raise RuntimeError(
-            "No Hugging Face token provided. Set --token or HF_TOKEN."
+            "No Hugging Face token provided. Set --token, export one of "
+            "HF_TOKEN/HUGGING_FACE_TOKEN/HUGGING_FACE_HUB_TOKEN, or add it to .env."
         )
 
     validate_local_dir(local_dir, required_files)
@@ -156,11 +237,13 @@ def main() -> None:
         print(f"ignore_patterns={ignore_patterns}")
         print(f"allow_patterns={args.allow_pattern}")
         print(f"commit_message={commit_message}")
+        print(f"token_source={token_source}")
+        print(f"token_present={bool(token)}")
         return
 
     from huggingface_hub import HfApi
 
-    api = HfApi(token=args.token)
+    api = HfApi(token=token)
     api.create_repo(
         repo_id=args.repo_id,
         repo_type=args.repo_type,
