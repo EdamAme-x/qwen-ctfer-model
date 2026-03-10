@@ -1,0 +1,59 @@
+{
+  "run_name": "qwen35-9b-ctf-smoke",
+  "seed": 42,
+  "model": {
+    "name_or_path": "Qwen/Qwen3.5-9B",
+    "torch_dtype": "bfloat16",
+    "trust_remote_code": false,
+    "use_fast_tokenizer": true,
+    "padding_side": "right",
+    "attn_implementation": "sdpa",
+    "device_map": "auto",
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16"
+  },
+  "data": {
+    "train_file": "data/processed/train.jsonl",
+    "eval_file": "data/processed/eval.jsonl"
+  },
+  "formatting": {
+    "assistant_only_loss": true
+  },
+  "lora": {
+    "r": 8,
+    "alpha": 16,
+    "dropout": 0.05,
+    "bias": "none",
+    "target_modules": "all-linear",
+    "task_type": "CAUSAL_LM"
+  },
+  "training": {
+    "output_dir": "outputs/checkpoints/qwen35-9b-smoke",
+    "num_train_epochs": 1,
+    "max_steps": 1,
+    "per_device_train_batch_size": 1,
+    "per_device_eval_batch_size": 1,
+    "gradient_accumulation_steps": 1,
+    "learning_rate": 0.0002,
+    "lr_scheduler_type": "constant",
+    "warmup_steps": 0,
+    "weight_decay": 0.0,
+    "max_grad_norm": 1.0,
+    "logging_steps": 1,
+    "save_strategy": "steps",
+    "save_steps": 1,
+    "save_total_limit": 1,
+    "evaluation_strategy": "steps",
+    "eval_steps": 1,
+    "gradient_checkpointing": true,
+    "bf16": true,
+    "fp16": false,
+    "packing": false,
+    "max_seq_length": 1024,
+    "report_to": [
+      "none"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "enabled": false,
+  "source_id": "scraped_writeups_batch",
+  "source": "transformed_scraped",
+  "license": "review_required",
+  "defaults": {
+    "category": "unknown",
+    "difficulty": "unknown",
+    "challenge_family": "unknown",
+    "split": "train",
+    "artifacts": {
+      "language": "text",
+      "has_code": false
+    }
+  },
+  "notes": [
+    "This template is for reviewed derivatives of scraped pages, not the raw cache itself.",
+    "Fetch raw pages into data/raw/scraped/ with scripts/scrape_writeups.py, then manually convert approved content into JSONL before using this manifest."
+  ],
+  "records": [
+    {
+      "path": "data/raw/self_authored/reviewed_scraped_derivatives.jsonl",
+      "format": "jsonl_qa",
+      "defaults": {
+        "system_prompt": "You are a CTF assistant working in an authorized sandbox. Be concise, evidence-first, and technical.",
+        "source_bucket": "scraped_derivative",
+        "redistribution_status": "manual_review_required"
+      }
+    }
+  ]
+}
