@@ -137,6 +137,83 @@ python scripts/push_to_hub.py --help
 
 adapter を先に公開し、merged model は後追いにします。
 
+### 8. Hugging Face token を `.env` で渡す
+
+`.env.example` を参考にリポジトリ直下へ `.env` を置きます。
+
+```bash
+cp .env.example .env
+```
+
+最低限:
+
+```dotenv
+HUGGING_FACE_TOKEN=hf_xxx
+```
+
+公開スクリプトは `HUGGING_FACE_TOKEN` を優先して使い、互換のため `HF_TOKEN` と `HUGGING_FACE_HUB_TOKEN` も受け付ける前提です。
+
+### 9. Model card を埋める
+
+公開前に `model_cards/adapter.md` または `model_cards/merged.md` をベースにして、実際に upload するフォルダの `README.md` を作ります。
+
+埋める内容:
+
+- base model と license
+- 学習データの由来と匿名化方針
+- 主な学習設定
+- eval 結果
+- 制限事項と intended use
+
+### 10. Adapter を公開する
+
+adapter release directory の例:
+
+```text
+outputs/checkpoints/qwen25-coder-7b-qlora/
+├── README.md
+├── adapter_config.json
+└── ...
+```
+
+公開例:
+
+```bash
+python scripts/push_to_hub.py \
+  --local-dir outputs/checkpoints/qwen25-coder-7b-qlora \
+  --repo-id <hf_user>/qwen-ctfer-7b-lora \
+  --release-kind adapter
+```
+
+### 11. Merged model を公開する
+
+まず adapter をマージします。
+
+```bash
+python scripts/merge_adapter.py \
+  --base-model Qwen/Qwen2.5-Coder-7B-Instruct \
+  --adapter outputs/checkpoints/qwen25-coder-7b-qlora \
+  --output-dir outputs/merged/qwen25-coder-7b
+```
+
+merged release directory の例:
+
+```text
+outputs/merged/qwen25-coder-7b/
+├── README.md
+├── config.json
+└── ...
+```
+
+公開例:
+
+```bash
+python scripts/push_to_hub.py \
+  --local-dir outputs/merged/qwen25-coder-7b \
+  --repo-id <hf_user>/qwen-ctfer-7b-merged \
+  --release-kind merged
+```
+
 ## Minimal workflow
 
 1. raw source と provenance manifest を収集する
