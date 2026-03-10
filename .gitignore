@@ -205,3 +205,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Local notes
+TODO.md
+.agents/
+
+# Project data and outputs
+data/raw/scraped/*
+!data/raw/scraped/.gitkeep
+outputs/
+*.local.json
