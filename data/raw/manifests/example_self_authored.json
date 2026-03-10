@@ -1,0 +1,24 @@
+{
+  "source_id": "example_self_authored",
+  "source": "self_authored",
+  "license": "internal_or_permitted",
+  "defaults": {
+    "category": "rev",
+    "difficulty": "easy",
+    "challenge_family": "warmup",
+    "split": "train",
+    "artifacts": {
+      "language": "python",
+      "has_code": true
+    }
+  },
+  "records": [
+    {
+      "path": "data/raw/self_authored/example_records.jsonl",
+      "format": "jsonl_qa",
+      "defaults": {
+        "system_prompt": "You are a CTF assistant working in an authorized sandbox. Be concise, evidence-first, and technical."
+      }
+    }
+  ]
+}
