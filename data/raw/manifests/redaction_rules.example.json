@@ -1,0 +1,23 @@
+{
+  "drop_keys": [
+    "contest",
+    "contest_name",
+    "event_name",
+    "challenge",
+    "challenge_name",
+    "problem",
+    "problem_name",
+    "problem_title",
+    "title"
+  ],
+  "rules": [
+    {
+      "pattern": "(?i)example[_ -]?ctf",
+      "replacement": "<CTF_EVENT>"
+    },
+    {
+      "pattern": "(?i)rev[_ -]?warmup|pwn[_ -]?stack",
+      "replacement": "<CHALLENGE_NAME>"
+    }
+  ]
+}

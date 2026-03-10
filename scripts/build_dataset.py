@@ -5,12 +5,13 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 import re
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, List, Tuple
+from typing import Any, Dict, Iterable, Iterator, List, Pattern, Tuple
 
 
 DEFAULT_SYSTEM_PROMPT = (
@@ -38,6 +39,24 @@ REQUIRED_SAMPLE_KEYS = (
     "challenge_family",
     "messages",
 )
+
+DEFAULT_REDACTION_DROP_KEYS = (
+    "contest",
+    "contest_name",
+    "event_name",
+    "challenge",
+    "challenge_name",
+    "problem",
+    "problem_name",
+    "problem_title",
+    "title",
+)
+
+REGEX_FLAG_MAP = {
+    "IGNORECASE": re.IGNORECASE,
+    "MULTILINE": re.MULTILINE,
+    "DOTALL": re.DOTALL,
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -77,6 +96,22 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip missing source files instead of failing.",
     )
+    parser.add_argument(
+        "--redaction-rules",
+        default=None,
+        help=(
+            "Optional JSON file with regex replacements and metadata keys to drop "
+            "for stronger anonymization."
+        ),
+    )
+    parser.add_argument(
+        "--strict-anonymize",
+        action="store_true",
+        help=(
+            "Drop provenance and title-like metadata keys from emitted samples. "
+            "Use with --redaction-rules for regex masking of contest/problem names."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -89,6 +124,11 @@ def main() -> int:
         resolve_path(repo_root, Path(args.summary_path))
         if args.summary_path
         else output_dir / "summary.json"
+    )
+    redaction_policy = (
+        load_redaction_policy(resolve_path(repo_root, Path(args.redaction_rules)))
+        if args.redaction_rules
+        else None
     )
 
     manifests = sorted(manifest_dir.glob("*.json"))
@@ -103,6 +143,8 @@ def main() -> int:
     split_counts: Counter[str] = Counter()
 
     for manifest_path in manifests:
+        if redaction_policy and manifest_path.resolve() == Path(redaction_policy["path"]).resolve():
+            continue
         manifest = load_json(manifest_path)
         if not isinstance(manifest, dict):
             raise ValueError(f"Manifest must be a JSON object: {manifest_path}")
@@ -113,6 +155,8 @@ def main() -> int:
             manifest=manifest,
             default_system_prompt=args.default_system_prompt,
             allow_missing_paths=args.allow_missing_paths,
+            redaction_policy=redaction_policy,
+            strict_anonymize=args.strict_anonymize,
         ):
             sample_id = sample["id"]
             if sample_id in seen_ids:
@@ -139,6 +183,10 @@ def main() -> int:
         "sources": dict(sorted(source_counts.items())),
         "manifests": dict(sorted(manifest_counts.items())),
         "files_written": sorted(f"{split}.jsonl" for split in grouped_samples),
+        "redaction_rules": str(resolve_path(repo_root, Path(args.redaction_rules)))
+        if args.redaction_rules
+        else None,
+        "strict_anonymize": args.strict_anonymize,
     }
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
@@ -154,6 +202,8 @@ def iter_manifest_samples(
     manifest: dict[str, Any],
     default_system_prompt: str,
     allow_missing_paths: bool,
+    redaction_policy: dict[str, Any] | None,
+    strict_anonymize: bool,
 ) -> Iterator[dict[str, Any]]:
     source_id = manifest.get("source_id") or manifest_path.stem
     manifest_defaults = normalize_defaults(
@@ -203,6 +253,8 @@ def iter_manifest_samples(
                     source_path=resolved_path,
                     sample_index=sample_index,
                     default_system_prompt=default_system_prompt,
+                    redaction_policy=redaction_policy,
+                    strict_anonymize=strict_anonymize,
                 )
                 yield normalized
 
@@ -372,11 +424,26 @@ def normalize_sample(
     source_path: Path,
     sample_index: int,
     default_system_prompt: str,
+    redaction_policy: dict[str, Any] | None,
+    strict_anonymize: bool,
 ) -> dict[str, Any]:
     merged = merge_dicts(defaults, sample)
-    merged["id"] = slugify(
+    original_identifier = str(
         merged.get("id") or f"{source_id}_{source_path.stem}_{sample_index}"
     )
+    if strict_anonymize:
+        merged = drop_metadata_keys(merged, set(DEFAULT_REDACTION_DROP_KEYS))
+    if redaction_policy:
+        merged = apply_redaction_policy(merged, redaction_policy)
+    if strict_anonymize:
+        merged["id"] = build_anonymized_id(
+            original_identifier=original_identifier,
+            category=str(merged.get("category", "sample")),
+        )
+    else:
+        merged["id"] = slugify(merged.get("id") or original_identifier)
+        if redaction_policy:
+            merged["id"] = f"{merged['id']}_{short_hash(original_identifier)}"
     merged["messages"] = normalize_messages(
         merged.get("messages"),
         default_system_prompt=default_system_prompt,
@@ -393,6 +460,8 @@ def normalize_sample(
         "source_path": str(source_path),
     }
     merged.pop("system_prompt", None)
+    if strict_anonymize:
+        merged.pop("provenance", None)
 
     for key in REQUIRED_SAMPLE_KEYS:
         if key not in merged:
@@ -482,6 +551,85 @@ def normalize_defaults(defaults: dict[str, Any]) -> dict[str, Any]:
     if "artifacts" in normalized and not isinstance(normalized["artifacts"], dict):
         raise ValueError("artifacts default must be an object")
     return normalized
+
+
+def load_redaction_policy(path: Path) -> dict[str, Any]:
+    payload = load_json(path)
+    if not isinstance(payload, dict):
+        raise ValueError(f"Redaction rules must be a JSON object: {path}")
+
+    drop_keys = payload.get("drop_keys", list(DEFAULT_REDACTION_DROP_KEYS))
+    if not isinstance(drop_keys, list) or not all(isinstance(item, str) for item in drop_keys):
+        raise ValueError("redaction drop_keys must be a list of strings")
+
+    forbidden = set(drop_keys) & set(REQUIRED_SAMPLE_KEYS)
+    if forbidden:
+        raise ValueError(
+            "redaction drop_keys must not remove required sample keys: "
+            + ", ".join(sorted(forbidden))
+        )
+
+    compiled_rules: list[tuple[Pattern[str], str]] = []
+    for index, rule in enumerate(payload.get("rules", [])):
+        if not isinstance(rule, dict):
+            raise ValueError(f"redaction rule #{index} must be an object")
+        pattern = rule.get("pattern")
+        replacement = rule.get("replacement", "")
+        if not isinstance(pattern, str):
+            raise ValueError(f"redaction rule #{index} is missing a string pattern")
+        flags = 0
+        for flag_name in rule.get("flags", []):
+            try:
+                flags |= REGEX_FLAG_MAP[flag_name]
+            except KeyError as exc:
+                raise ValueError(f"Unsupported regex flag: {flag_name}") from exc
+        compiled_rules.append((re.compile(pattern, flags), str(replacement)))
+
+    return {
+        "drop_keys": set(drop_keys),
+        "rules": compiled_rules,
+        "path": str(path),
+    }
+
+
+def drop_metadata_keys(value: Any, drop_keys: set[str]) -> Any:
+    if isinstance(value, list):
+        return [drop_metadata_keys(item, drop_keys) for item in value]
+    if isinstance(value, dict):
+        reduced: dict[str, Any] = {}
+        for key, item in value.items():
+            if key in drop_keys:
+                continue
+            reduced[key] = drop_metadata_keys(item, drop_keys)
+        return reduced
+    return value
+
+
+def apply_redaction_policy(value: Any, policy: dict[str, Any]) -> Any:
+    if isinstance(value, str):
+        redacted = value
+        for pattern, replacement in policy["rules"]:
+            redacted = pattern.sub(replacement, redacted)
+        return redacted
+    if isinstance(value, list):
+        return [apply_redaction_policy(item, policy) for item in value]
+    if isinstance(value, dict):
+        redacted_dict: dict[str, Any] = {}
+        for key, item in value.items():
+            if key in policy["drop_keys"]:
+                continue
+            redacted_dict[key] = apply_redaction_policy(item, policy)
+        return redacted_dict
+    return value
+
+
+def build_anonymized_id(*, original_identifier: str, category: str) -> str:
+    category_slug = slugify(category.lower()) or "sample"
+    return f"{category_slug}_{short_hash(original_identifier)}"
+
+
+def short_hash(value: str) -> str:
+    return hashlib.sha1(value.encode("utf-8")).hexdigest()[:10]
 
 
 def merge_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
