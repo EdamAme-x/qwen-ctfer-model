@@ -574,3 +574,15 @@ As of the current design, the project should assume:
 - primary success metric: better CTF task usefulness than the base model
 
 Any later change to the base model or training stack should be treated as a deliberate design revision and documented in this file.
+
+## 20. Implementation Notes
+
+The following points were verified during the first end-to-end smoke run and should be treated as operational guidance, not theory:
+
+- Template manifests under `data/raw/manifests/` must be explicitly skippable. Use `"enabled": false` on non-live template files so `build_dataset.py` does not try to ingest placeholder paths.
+- `scripts/train_lora.py` should import dependencies with `importlib.import_module()`. Using `__import__(..., fromlist=["*"])` can trigger false failures with modern `transformers` builds because optional modules such as `torchaudio` may be touched during import.
+- The current training pipeline pre-renders conversations into a plain `text` field before handing data to `trl.SFTTrainer`. In this shape, `assistant_only_loss=True` is invalid and must remain disabled until the trainer consumes conversational examples directly.
+- Strong anonymization changes sample IDs enough to create collisions if IDs are derived from challenge names. Anonymous IDs should therefore be hash-derived rather than title-derived.
+- A local smoke train for `Qwen/Qwen2.5-Coder-7B-Instruct` with QLoRA did complete on an RTX 5080 16 GB class GPU using the smoke config (`r=8`, `max_seq_length=1024`, `max_steps=1`) and produced adapter artifacts under `outputs/smoke/checkpoints/qwen25-coder-7b-smoke/`.
+- The expensive part of the first smoke run is model download and initial weight loading, not the single optimizer step. Hub authentication improves that startup path materially, so authenticated downloads should be preferred before larger runs.
+- WSL Python and Windows Python must be treated as separate runtime environments. Package installation in one does not provision the other. Heavy runs should stay inside one chosen runtime for the duration of the experiment.
