@@ -148,6 +148,8 @@ def main() -> int:
         manifest = load_json(manifest_path)
         if not isinstance(manifest, dict):
             raise ValueError(f"Manifest must be a JSON object: {manifest_path}")
+        if manifest.get("enabled", True) is False:
+            continue
 
         for sample in iter_manifest_samples(
             repo_root=repo_root,

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import inspect
 import json
 import shutil
@@ -13,7 +14,7 @@ from typing import Any
 
 def require_dependency(module_name: str, install_hint: str) -> Any:
     try:
-        return __import__(module_name, fromlist=["*"])
+        return importlib.import_module(module_name)
     except ImportError as exc:
         raise SystemExit(f"Missing dependency '{module_name}'. Install with: {install_hint}") from exc
 
@@ -154,7 +155,10 @@ def build_training_args(training_cfg: dict[str, Any], formatting_cfg: dict[str, 
     candidate_kwargs["dataset_text_field"] = "text"
     candidate_kwargs["max_seq_length"] = training_cfg.get("max_seq_length", 4096)
     candidate_kwargs["packing"] = training_cfg.get("packing", False)
-    candidate_kwargs["assistant_only_loss"] = formatting_cfg.get("assistant_only_loss", False)
+    # We currently pre-render conversational samples into a plain `text` field.
+    # TRL only supports assistant_only_loss on conversational datasets, so disable
+    # it here until the pipeline keeps `messages` all the way into the trainer.
+    candidate_kwargs["assistant_only_loss"] = False
     candidate_kwargs["report_to"] = training_cfg.get("report_to", ["none"])
     return trl.SFTConfig(**filter_kwargs(trl.SFTConfig, candidate_kwargs))
 
