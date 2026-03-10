@@ -155,6 +155,7 @@ The dataset should avoid:
 
 - raw scraped text dumps with unclear license,
 - public flags or secrets that the model can memorize,
+- contest names and challenge titles copied verbatim when they are not necessary for the skill being trained,
 - low-signal generic coding chat,
 - repetitive paraphrases of the same challenge,
 - unverifiable or hallucinated solutions.
@@ -198,6 +199,7 @@ Rules for `data/raw/scraped/`:
 - do not commit third-party scrape payloads to Git,
 - attach a manifest with URL, fetch time, author if known, and redistribution status,
 - train only on transformed or self-authored derivatives after license review.
+- default to strong anonymization before writing `data/processed/`: drop provenance/title-like metadata and regex-mask competition or challenge identifiers when they are not essential.
 
 ### Data schema
 
