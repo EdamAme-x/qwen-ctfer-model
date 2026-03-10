@@ -40,6 +40,14 @@ REQUIRED_SAMPLE_KEYS = (
     "messages",
 )
 
+SCRAPED_REVIEW_SOURCES = {
+    "transformed_scraped",
+}
+
+SCRAPED_REVIEW_SOURCE_BUCKETS = {
+    "scraped_derivative",
+}
+
 DEFAULT_REDACTION_DROP_KEYS = (
     "contest",
     "contest_name",
@@ -214,6 +222,12 @@ def iter_manifest_samples(
             "license": manifest.get("license", "unknown"),
             **(manifest.get("defaults") or {}),
         }
+    )
+    validate_scraped_review_requirements(
+        manifest_path=manifest_path,
+        manifest=manifest,
+        manifest_defaults=manifest_defaults,
+        repo_root=repo_root,
     )
 
     records = manifest.get("records")
@@ -553,6 +567,112 @@ def normalize_defaults(defaults: dict[str, Any]) -> dict[str, Any]:
     if "artifacts" in normalized and not isinstance(normalized["artifacts"], dict):
         raise ValueError("artifacts default must be an object")
     return normalized
+
+
+def validate_scraped_review_requirements(
+    *,
+    manifest_path: Path,
+    manifest: dict[str, Any],
+    manifest_defaults: dict[str, Any],
+    repo_root: Path,
+) -> None:
+    manifest_source = str(manifest.get("source", manifest_defaults.get("source", ""))).strip()
+    records = manifest.get("records")
+    if not isinstance(records, list):
+        return
+
+    requires_review = manifest_source in SCRAPED_REVIEW_SOURCES
+    if not requires_review:
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            record_defaults = record.get("defaults") or {}
+            source_bucket = str(record_defaults.get("source_bucket", "")).strip()
+            if source_bucket in SCRAPED_REVIEW_SOURCE_BUCKETS:
+                requires_review = True
+                break
+
+    if not requires_review:
+        return
+
+    for record_index, record in enumerate(records):
+        if not isinstance(record, dict):
+            continue
+        record_defaults = normalize_defaults(
+            merge_dicts(manifest_defaults, record.get("defaults") or {})
+        )
+        missing_fields: list[str] = []
+        for field_name in (
+            "allowed_for_training",
+            "allowed_for_redistribution",
+            "review_status",
+            "redistribution_status",
+            "source_ledger_path",
+        ):
+            if field_name not in record_defaults:
+                missing_fields.append(field_name)
+        if missing_fields:
+            joined = ", ".join(missing_fields)
+            raise ValueError(
+                f"Reviewed scraped manifest is missing required defaults in "
+                f"{manifest_path} record #{record_index}: {joined}. "
+                "Add explicit review metadata before building the dataset."
+            )
+
+        if not isinstance(record_defaults["allowed_for_training"], bool):
+            raise ValueError(
+                f"'allowed_for_training' must be a boolean in {manifest_path} "
+                f"record #{record_index}"
+            )
+        if not isinstance(record_defaults["allowed_for_redistribution"], bool):
+            raise ValueError(
+                f"'allowed_for_redistribution' must be a boolean in {manifest_path} "
+                f"record #{record_index}"
+            )
+        if not isinstance(record_defaults["review_status"], str) or not record_defaults[
+            "review_status"
+        ].strip():
+            raise ValueError(
+                f"'review_status' must be a non-empty string in {manifest_path} "
+                f"record #{record_index}"
+            )
+        if not isinstance(record_defaults["redistribution_status"], str) or not record_defaults[
+            "redistribution_status"
+        ].strip():
+            raise ValueError(
+                f"'redistribution_status' must be a non-empty string in {manifest_path} "
+                f"record #{record_index}"
+            )
+        if not isinstance(record_defaults["source_ledger_path"], str) or not record_defaults[
+            "source_ledger_path"
+        ].strip():
+            raise ValueError(
+                f"'source_ledger_path' must be a non-empty string in {manifest_path} "
+                f"record #{record_index}"
+            )
+        source_ledger_path = resolve_record_path(
+            repo_root=repo_root,
+            manifest_path=manifest_path,
+            source_path=record_defaults["source_ledger_path"],
+        )
+        if not source_ledger_path.exists():
+            raise FileNotFoundError(
+                f"'source_ledger_path' does not exist in {manifest_path} "
+                f"record #{record_index}: {source_ledger_path}"
+            )
+        if record_defaults["allowed_for_training"] is not True:
+            raise ValueError(
+                f"Reviewed scraped manifest cannot be built while "
+                f"'allowed_for_training' is false in {manifest_path} record #{record_index}. "
+                "Keep it out of build_dataset until review is complete."
+            )
+        review_status = record_defaults["review_status"].strip().lower()
+        if review_status in {"pending", "review_required", "unreviewed"}:
+            raise ValueError(
+                f"Reviewed scraped manifest has non-final review_status={record_defaults['review_status']!r} "
+                f"in {manifest_path} record #{record_index}. Approve the source ledger row "
+                "before building dataset artifacts."
+            )
 
 
 def load_redaction_policy(path: Path) -> dict[str, Any]:

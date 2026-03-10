@@ -1,0 +1,502 @@
+<!DOCTYPE html><html lang="en"> <head><!-- Global Metadata --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/svg+xml" href="/images/favicon.svg"><meta name="generator" content="Astro v5.17.2"><!-- Preload local fonts --><link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin><!-- Preconnect for MathJax fonts --><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><!-- Preload critical MathJax fonts --><link rel="preload" href="https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff" as="font" type="font/woff" crossorigin><!-- MathJax configuration --><script>
+  window.MathJax = {
+    loader: { load: ['input/tex', 'output/chtml'] },
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    options: {
+      skipHtmlTags: ['script','noscript','style','textarea','pre','code'],
+      processHtmlClass: 'math'
+    }
+  };
+</script><!-- MathJax script (deferred) --><script id="mathjax-script" defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script><!-- Defer MathJax typesetting until page load --><script>
+  window.addEventListener('load', () => {
+    if (window.MathJax?.typesetPromise) {
+      const mathElements = document.querySelectorAll('.math');
+      MathJax.typesetPromise(mathElements)
+        .catch(err => console.error('MathJax typeset failed:', err));
+    }
+  });
+
+  // Re-run after Astro page swaps
+  document.addEventListener('astro:after-swap', () => {
+    if (window.MathJax?.typesetPromise) {
+      const mathElements = document.querySelectorAll('.math');
+      MathJax.typesetPromise(mathElements)
+        .catch(err => console.error('MathJax typeset failed:', err));
+    }
+  });
+</script><!-- Canonical URL --><link rel="canonical" href="https://bjs-bytes.com/blog/fortid-ctf-writeup/"><!-- Primary Meta Tags --><title>My First CTF on the UTD Competitive Team | BJ&#39;s Bytes</title><meta name="title" content="My First CTF on the UTD Competitive Team | BJ's Bytes"><meta name="description" content="My experience and writeups for the FortID CTF 2025 as part of CSG, one of the best academic CTF teams in the country"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://bjs-bytes.com/blog/fortid-ctf-writeup/"><meta property="og:title" content="My First CTF on the UTD Competitive Team | BJ's Bytes"><meta property="og:description" content="My experience and writeups for the FortID CTF 2025 as part of CSG, one of the best academic CTF teams in the country"><meta property="og:image" content="https://bjs-bytes.com/open-graph.jpg"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://bjs-bytes.com/blog/fortid-ctf-writeup/"><meta property="twitter:title" content="My First CTF on the UTD Competitive Team | BJ's Bytes"><meta property="twitter:description" content="My experience and writeups for the FortID CTF 2025 as part of CSG, one of the best academic CTF teams in the country"><meta property="twitter:image" content="https://bjs-bytes.com/open-graph.jpg"><!-- Sitemap --><link rel="sitemap" href="/sitemap-index.xml"><!-- RSS Feed --><link rel="alternate" type="application/rss+xml" title="My First CTF on the UTD Competitive Team | BJ's Bytes" href="https://bjs-bytes.com/rss.xml"><!-- Remove preloaded fonts after page swap --><script type="module">let e=!1;function t(){document.querySelectorAll(".animate").forEach((e,t)=>{setTimeout(()=>{requestAnimationFrame(()=>{e.classList.add("show")})},150*t)})}document.addEventListener("scroll",function(){e||(window.requestAnimationFrame(()=>{const t=document.getElementById("header");window.scrollY>0?t.classList.add("scrolled"):t.classList.remove("scrolled"),e=!1}),e=!0)}),document.addEventListener("DOMContentLoaded",t),document.addEventListener("astro:after-swap",t);function s(e){const t=e.currentTarget.closest("pre").querySelector("code");navigator.clipboard.writeText(t.innerText);const s=e.currentTarget.querySelector("use");s.setAttribute("href","/images/copy.svg#filled"),setTimeout(()=>{s&&s.setAttribute("href","/images/copy.svg#empty")},100)}document.querySelectorAll("pre:has(code)").forEach(e=>{e.classList.add("relative");const t=e.querySelector("code"),o=document.createElement("div");o.classList.add("scroll-wrapper"),o.style.overflowX="auto",e.replaceChild(o,t),o.appendChild(t);const r=document.createElementNS("http://www.w3.org/2000/svg","use");r.setAttribute("href","/images/copy.svg#empty");const c=document.createElementNS("http://www.w3.org/2000/svg","svg");c.classList.add("copy-svg"),c.setAttribute("width","20"),c.setAttribute("height","20"),c.appendChild(r);const n=document.createElement("button");n.appendChild(c),n.classList.add("copy-btn"),n.setAttribute("title","Copy code"),n.addEventListener("click",s);const d=document.createElement("div");d.classList.add("copy-cnt"),d.setAttribute("style","position: absolute; top: 0.5rem; right: 0.5rem;"),d.appendChild(n),e.insertBefore(d,o)}),document.addEventListener("astro:before-swap",e=>[...e.newDocument.head.querySelectorAll('link[as="font"]')].forEach(e=>e.remove()));</script><link rel="stylesheet" href="/_astro/_slug_.BvKGY1ob.css"></head> <body> <header id="header" class="fixed top-0 w-full h-16 z-50 scrolled" data-astro-cid-3ef6ksr2> <div class="w-full h-full mx-auto px-5 max-w-screen-md">  <div class="relative h-full w-full" data-astro-cid-3ef6ksr2> <div class="absolute left-0 top-1/2 -translate-y-1/2 flex gap-1 font-semibold" data-astro-cid-3ef6ksr2> <a href="/" class="flex items-center gap-1 text-current hover:text-white transition-colors duration-300 ease-in-out" data-astro-cid-3ef6ksr2> <img src="/images/logo.png" alt="Logo" class="size-8" data-astro-cid-3ef6ksr2> <div data-astro-cid-3ef6ksr2> BJ&#39;s Bytes </div> </a> </div> <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" data-astro-cid-3ef6ksr2> <nav class="hidden md:flex items-center justify-center text-sm gap-1" data-astro-cid-3ef6ksr2> <a href="/" class="h-8 rounded-full px-3 text-white flex items-center justify-center transition-colors duration-300 ease-in-out hover:bg-[var(--primary-color)] hover:text-black" data-astro-cid-3ef6ksr2> Home </a><a href="/work/" class="h-8 rounded-full px-3 text-white flex items-center justify-center transition-colors duration-300 ease-in-out hover:bg-[var(--primary-color)] hover:text-black" data-astro-cid-3ef6ksr2> Work </a><a href="/blog/" class="h-8 rounded-full px-3 text-white flex items-center justify-center transition-colors duration-300 ease-in-out hover:bg-[var(--primary-color)] hover:text-black" data-astro-cid-3ef6ksr2> Blog </a><a href="/projects/" class="h-8 rounded-full px-3 text-white flex items-center justify-center transition-colors duration-300 ease-in-out hover:bg-[var(--primary-color)] hover:text-black" data-astro-cid-3ef6ksr2> Projects </a> </nav> </div> <div class="buttons absolute right-0 top-1/2 -translate-y-1/2 flex gap-1" data-astro-cid-3ef6ksr2> <a href="/search/" aria-label="Search blog posts and projects on BJ's Bytes" class="hidden md:flex size-9 rounded-full p-2 items-center justify-center bg-transparent hover:bg-[var(--primary-color)] stroke-current hover:stroke-black border border-white/25 transition-colors duration-300 ease-in-out" data-astro-cid-3ef6ksr2> <svg class="size-full" data-astro-cid-3ef6ksr2> <use href="/images/ui.svg#search" data-astro-cid-3ef6ksr2></use> </svg> </a> <a href="/rss.xml" target="_blank" aria-label="Rss feed for BJ's Bytes" class="hidden md:flex size-9 rounded-full p-2 items-center justify-center bg-transparent hover:bg-[var(--primary-color)] stroke-current hover:stroke-black border border-white/25 transition-colors duration-300 ease-in-out" data-astro-cid-3ef6ksr2> <svg class="size-full" data-astro-cid-3ef6ksr2> <use href="/images/ui.svg#rss" data-astro-cid-3ef6ksr2></use> </svg> </a> <button id="header-drawer-button" aria-label="Toggle drawer open and closed" class="flex md:hidden size-9 rounded-full p-2 items-center justify-center bg-transparent hover:bg-white/20 stroke-current hover:stroke-black border border-white/25 transition-colors duration-300 ease-in-out" data-astro-cid-3ef6ksr2> <svg id="drawer-open" class="size-full" data-astro-cid-3ef6ksr2> <use href="/images/ui.svg#menu" data-astro-cid-3ef6ksr2></use> </svg> <svg id="drawer-close" class="size-full" data-astro-cid-3ef6ksr2> <use href="/images/ui.svg#x" data-astro-cid-3ef6ksr2></use> </svg> </button> <!-- Cookie icon --><div class="relative"> <button id="cookie-icon" aria-label="Cookie consent" class="hidden md:flex
+           size-9 rounded-full p-2 items-center justify-center
+           bg-transparent hover:bg-[var(--primary-color)]
+           stroke-current hover:stroke-black
+           border border-white/25
+           transition-colors duration-300 ease-in-out">
+🍪
+</button> <!-- Speech bubble --> <div id="cookie-consent-bubble" class="absolute right-0 mt-2 w-64
+           bg-black text-white text-xs rounded-lg shadow-lg p-3
+           opacity-0 scale-95 pointer-events-none
+           transition-all duration-300 ease-out z-50"> <div class="mb-2 leading-snug text-center"> <p class="text-xs">Have a <strong><a href="/legal/privacy">cookie</a></strong>!</p> <p class="text-xs">By browsing this site, you consent to cookies so I have fun analytics data.</p> </div> <button id="accept-cookies" class="w-full px-3 py-1 bg-[var(--primary-color)] text-black rounded hover:brightness-90 transition text-xs">
+Accept
+</button> <div class="absolute -top-1 right-6 w-2 h-2 bg-black rotate-45"></div> </div> </div> <script>
+  const bubble = document.getElementById('cookie-consent-bubble');
+  const cookieIcon = document.getElementById('cookie-icon');
+  const acceptBtn = document.getElementById('accept-cookies');
+
+  function loadGA() {
+    const script = document.createElement('script');
+    script.src = "https://www.googletagmanager.com/gtag/js?id=G-9NDC5SD0SS";
+    script.async = true;
+    document.head.appendChild(script);
+
+    const inlineScript = document.createElement('script');
+    inlineScript.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-9NDC5SD0SS', { 'anonymize_ip': true });
+    `;
+    document.head.appendChild(inlineScript);
+  }
+
+  function showBubble() {
+    bubble.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+    bubble.classList.add('opacity-100', 'scale-100');
+  }
+
+  function hideBubble() {
+    bubble.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+    bubble.classList.remove('opacity-100', 'scale-100');
+  }
+
+  // Initial state
+  if (localStorage.getItem('ga-consent') !== 'true') {
+    showBubble();
+  } else {
+    cookieIcon.style.display = 'none';
+    loadGA();
+  }
+
+  acceptBtn.addEventListener('click', () => {
+    localStorage.setItem('ga-consent', 'true');
+    hideBubble();
+    cookieIcon.style.display = 'none';
+    loadGA();
+  });
+
+  // Hide bubble on any scroll movement
+  let lastScrollY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    if (localStorage.getItem('ga-consent') !== 'true') {
+      if (window.scrollY !== lastScrollY) {
+        hideBubble();
+      }
+      lastScrollY = window.scrollY;
+    }
+  });
+
+  // Toggle bubble on icon click
+  cookieIcon.addEventListener('click', () => {
+    if (localStorage.getItem('ga-consent') !== 'true') {
+      if (bubble.classList.contains('opacity-0')) {
+        showBubble();
+      } else {
+        hideBubble();
+      }
+    }
+  });
+</script> </div> </div>  </div> </header>  <script>
+  function toggleDrawer() {
+    const drawer = document.getElementById("drawer")
+    const drawerButton = document.getElementById("header-drawer-button")
+    drawer?.classList.toggle("open")
+    drawerButton?.classList.toggle("open")
+  }
+
+  function initializeDrawerButton() {
+    const drawerButton = document.getElementById("header-drawer-button")
+    drawerButton?.addEventListener("click", toggleDrawer)
+  }
+
+  document.addEventListener("astro:after-swap", initializeDrawerButton)
+  initializeDrawerButton()
+</script> <div id="drawer" class="fixed inset-0 h-0 z-40 overflow-hidden flex flex-col items-center justify-center md:hidden bg-neutral-900 transition-[height] duration-300 ease-in-out" data-astro-cid-hxtyo74s> <nav class="flex flex-col items-center space-y-2" data-astro-cid-hxtyo74s> <a href="/" class="flex items-center justify-center px-3 py-1 rounded-full text-white hover:text-white hover:bg-white/20 transition-colors duration-300 ease-in-out" data-astro-cid-hxtyo74s> Home </a><a href="/work/" class="flex items-center justify-center px-3 py-1 rounded-full text-white hover:text-white hover:bg-white/20 transition-colors duration-300 ease-in-out" data-astro-cid-hxtyo74s> Work </a><a href="/blog/" class="flex items-center justify-center px-3 py-1 rounded-full text-white hover:text-white hover:bg-white/20 transition-colors duration-300 ease-in-out" data-astro-cid-hxtyo74s> Blog </a><a href="/projects/" class="flex items-center justify-center px-3 py-1 rounded-full text-white hover:text-white hover:bg-white/20 transition-colors duration-300 ease-in-out" data-astro-cid-hxtyo74s> Projects </a> </nav> <div class="flex gap-1 mt-5" data-astro-cid-hxtyo74s> <a href="/search" aria-label="Search blog posts and projects on BJ's Bytes" class="size-9 rounded-full p-2 items-center justify-center bg-transparent hover:bg-white/20 stroke-current hover:stroke-white border border-white/25 transition-colors duration-300 ease-in-out" data-astro-cid-hxtyo74s> <svg class="size-full" data-astro-cid-hxtyo74s> <use href="/images/ui.svg#search" data-astro-cid-hxtyo74s></use> </svg> </a> <a href="/rss.xml" target="_blank" aria-label="Rss feed for BJ's Bytes" class="size-9 rounded-full p-2 items-center justify-center bg-transparent hover:bg-white/20 stroke-current hover:stroke-white border border-white/25 transition-colors duration-300 ease-in-out" data-astro-cid-hxtyo74s> <svg class="size-full" data-astro-cid-hxtyo74s> <use href="/images/ui.svg#rss" data-astro-cid-hxtyo74s></use> </svg> </a> </div> </div>  <main>  <div class="pt-36 pb-5"> <div class="w-full h-full mx-auto px-5 max-w-screen-md">   <div class="animate"> <div> <a href="/blog" class="group w-fit p-1.5 gap-1.5 text-sm flex items-center border rounded border-white/20 hover:bg-white/10 transition-colors duration-300 ease-in-out"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="stroke-current group-hover:stroke-white"> <line x1="19" y1="12" x2="5" y2="12" class="scale-x-0 group-hover:scale-x-100 translate-x-3 group-hover:translate-x-0 transition-all duration-300 ease-in-out"></line> <polyline points="12 19 5 12 12 5" class="translate-x-1 group-hover:translate-x-0 transition-all duration-300 ease-in-out"></polyline> </svg> <div class="w-full group-hover:text-white transition-colors duration-300 ease-in-out">
+Back to blog </div> </a> <div class="flex flex-wrap text-sm uppercase mt-12 gap-3 opacity-75"> <div class="flex items-center gap-2"> <svg class="size-5 stroke-current"> <use href="/images/ui.svg#calendar"></use> </svg> Sep 15, 2025 </div> <div class="flex items-center gap-2"> <svg class="size-5 stroke-current"> <use href="/images/ui.svg#book-open"></use> </svg> 18 min read </div> </div> <h1 class="text-3xl font-semibold text-white mt-2"> My First CTF on the UTD Competitive Team </h1> <div class="mt-1"> My experience and writeups for the FortID CTF 2025 as part of CSG, one of the best academic CTF teams in the country </div>  </div> </div>   </div> </div> <div class="flex-1 py-5"> <div class="w-full h-full mx-auto px-5 max-w-screen-md">   <div class="animate"> <div> <article> <p>This weekend was my first official CTF on the <a href="https://ctftime.org/team/333/">UT Dallas Competitive CTF Team</a> hosted by the Computer Security Group (CSG).</p>
+<p>We competed in the <a href="https://ctftime.org/event/2893/">FortID CTF</a> against 553 teams and achieved 20th place with 14/32 challenges solved and 3,198 points (Top 10 cutoff was 4,830 and 1st place had 8,546).</p>
+<h2 id="my-experience">My Experience</h2>
+<p>This was a 48 hour competition hosted by the employees of <a href="https://www.linkedin.com/company/blockhouse-technology-ltd/people/">Blockhouse Technology</a> in Zagreb, Croatia.</p>
+<p>There were 6 categories (Intro, Crypto, Rev, Misc, Web, &#x26; Pwn) and a total of 32 challenges, split pretty evenly between the categories. I focused on Crypto and Misc. (OSINT &#x26; Stego), but made sure to take a peek at every challenge.</p>
+<p>I started working on the challenges individually midday Friday, about 4 hours after they were released. I still had classes, clubs, and other work to attend to, so I was working on them off and on all day. 10 PM to around 3 AM was when I was finally able to work uninterrupted and make some serious progress with the challenges. I got started again at 10 AM the next day and then joined my team around 12:30 PM. We kept working till around 9:30 PM. So I put probably just under 20 hours into this competition.</p>
+<h2 id="writeup">Writeup</h2>
+<p>My first solves were in the Intro category as I started working on the CTF shortly after it opened, but a little earlier than most of my team.</p>
+<h3 id="intro---info">Intro - Info</h3>
+<p>“<strong>Take your time</strong> and read the information on our homepage.”</p>
+<hr>
+<p>This was a very easy challenge. Embedded in the background of the FortID homepage was very faint text that became clearer the longer I had the site open (while I supposedly read the rules… or maybe I just viewed the source and searched for the <code>FortId{</code> prefix…).</p>
+<p>Very beginner Web CTF stuff.</p>
+<a href="https://ctftime.org/event/2893/">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/intro-info.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/intro-info.png" alt="FortID CTF Homepage" width="900" loading="lazy">
+  </picture>
+</a>
+<p>After this, I started to work on the OSINT Exam challenge (see later), but after cracking the first of the six images and sharing my findings with my team, I decided to circle back around and knock out some more of the Intro challenges.</p>
+<h3 id="intro---rev">Intro - Rev</h3>
+<p>“In order to find the flag, you must first search for the flag.”</p>
+<hr>
+<p>My next solve was a reverse engineering challenge.</p>
+<p>I was provided a binary <code>./chall</code> which I decompiled with <a href="https://binary.ninja/">Binary Ninja</a> and I ran it:</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>\$ ./chall</span></span>
+<span class="line"><span>Enter flag: flag</span></span>
+<span class="line"><span>Nope</span></span></code></pre>
+<p>Looks like a “password” reversing challenge, where the flag is somewhere in the binary. Probably obfuscated somehow.</p>
+<p>I noticed in the disassembled pseudocode my input was being encoded as a sequence of <code>&#x3C;>=</code> characters (in any order) and compared to a sequence hardcoded in the program as a string <code>&#x3C;>&#x3C;&#x3C;&#x3C;>>=&#x3C;>>=&#x3C;>>>&#x3C;&#x3C;>=&#x3C;>>>&#x3C;>&#x3C;=&#x3C;>&#x3C;&#x3C;…</code>.</p>
+<p>The encoding process took each character and it would perform binary search to find the character, starting at the midpoint between <code>0x00</code> and <code>0xff</code>. Every time the search discovered the inputted character was higher than the midpoint it would encode a <code>&#x3C;</code>.<code>></code> would be encoded if it was lower and = would only be encoded when the character was found. Then it verified the encoded sequence matched the hardcoded sequence and would output “Correct!” or “Nope” depending on if the sequences matched.</p>
+<p>I knew the process and the hardcoded sequence, so by undoing this process I knew I could reveal the string we needed to input (the flag) to have the program succeed.</p>
+<p>So I wrote a quick little Python function:</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> decode</span><span style="color:#F0F3F6">(sequence):</span></span>
+<span class="line"><span style="color:#F0F3F6">    bytes_out </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> []</span></span>
+<span class="line"><span style="color:#FF9492">    for</span><span style="color:#F0F3F6"> group </span><span style="color:#FF9492">in</span><span style="color:#F0F3F6"> sequence.split(</span><span style="color:#ADDCFF">'='</span><span style="color:#F0F3F6">)[:</span><span style="color:#FF9492">-</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">]:  </span></span>
+<span class="line"><span style="color:#F0F3F6">        low, high </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 0</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">255</span></span>
+<span class="line"><span style="color:#FF9492">        for</span><span style="color:#F0F3F6"> ch </span><span style="color:#FF9492">in</span><span style="color:#F0F3F6"> group:</span></span>
+<span class="line"><span style="color:#F0F3F6">            mid </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> (low </span><span style="color:#FF9492">+</span><span style="color:#F0F3F6"> high) </span><span style="color:#FF9492">>></span><span style="color:#91CBFF"> 1</span></span>
+<span class="line"><span style="color:#FF9492">            if</span><span style="color:#F0F3F6"> ch </span><span style="color:#FF9492">==</span><span style="color:#ADDCFF"> '&#x3C;'</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">                high </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> mid </span><span style="color:#FF9492">-</span><span style="color:#91CBFF"> 1</span></span>
+<span class="line"><span style="color:#FF9492">            elif</span><span style="color:#F0F3F6"> ch </span><span style="color:#FF9492">==</span><span style="color:#ADDCFF"> '>'</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">                low </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> mid </span><span style="color:#FF9492">+</span><span style="color:#91CBFF"> 1</span></span>
+<span class="line"><span style="color:#F0F3F6">        target </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> (low </span><span style="color:#FF9492">+</span><span style="color:#F0F3F6"> high) </span><span style="color:#FF9492">>></span><span style="color:#91CBFF"> 1</span></span>
+<span class="line"><span style="color:#F0F3F6">        bytes_out.append(target)</span></span>
+<span class="line"><span style="color:#FF9492">    return</span><span style="color:#91CBFF"> bytes</span><span style="color:#F0F3F6">(bytes_out).decode(</span><span style="color:#ADDCFF">'latin-1'</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<p>Which I used to process the hardcoded sequence from Binary Ninja and produce the flag.</p>
+<p>Not too bad. I really liked this “binary search cipher”.</p>
+<h3 id="intro---web">Intro - Web</h3>
+<p>“In tangled webs of code we weave, JavaScript whispers, making pages breathe, Turning static dreams into worlds that live.”</p>
+<hr>
+<p>Immediately after cracking the reversing challenge I went onto do the web challenge which provided a <code>index.html</code> file for me to analyze. Opening the file in my browser just showed a dark background with a dark rectangle and a slight shadow around it.</p>
+<p>Looking at the source code itself, I found:</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="js"><code><span class="line"><span style="color:#F0F3F6">(</span><span style="color:#FF9492">function</span><span style="color:#F0F3F6">()</span></span>
+<span class="line"><span style="color:#F0F3F6">{ </span><span style="color:#BDC4CC">// You can skip this part, there’s an easier way: </span></span>
+<span class="line"><span style="color:#FF9492">const</span><span style="color:#91CBFF"> G</span><span style="color:#FF9492">=</span><span style="color:#91CBFF">V</span></span></code></pre>
+<p>which was almost convincing. I found it was heavily obfuscated with pointless loops and random functions, but I ran the source code through a JS beautifier to help with the obfuscation and discovered</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="js"><code><span class="line"><span style="color:#FF9492">const</span><span style="color:#91CBFF"> KEY</span><span style="color:#FF9492"> =</span><span style="color:#F0F3F6"> Uint8Array.</span><span style="color:#DBB7FF">of</span><span style="color:#F0F3F6">(</span><span style="color:#FF9492">...</span><span style="color:#F0F3F6">);</span></span>
+<span class="line"><span style="color:#FF9492">const</span><span style="color:#91CBFF"> ENC</span><span style="color:#FF9492"> =</span><span style="color:#F0F3F6"> Uint8Array.</span><span style="color:#DBB7FF">of</span><span style="color:#F0F3F6">(</span><span style="color:#FF9492">...</span><span style="color:#F0F3F6">);</span></span></code></pre>
+<p>which were defined as hardcoded arithmetic expressions rather than simple values.</p>
+<p>and later:</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="js"><code><span class="line"><span style="color:#FF9492">const</span><span style="color:#91CBFF"> DEC</span><span style="color:#FF9492"> =</span><span style="color:#FF9492"> new</span><span style="color:#DBB7FF"> Uint8Array</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">ENC</span><span style="color:#F0F3F6">.</span><span style="color:#91CBFF">length</span><span style="color:#F0F3F6">);</span></span>
+<span class="line"><span style="color:#FF9492">for</span><span style="color:#F0F3F6"> (</span><span style="color:#FF9492">let</span><span style="color:#F0F3F6"> i</span><span style="color:#FF9492">=</span><span style="color:#91CBFF">0</span><span style="color:#F0F3F6">; i</span><span style="color:#FF9492">&#x3C;</span><span style="color:#91CBFF">ENC</span><span style="color:#F0F3F6">.</span><span style="color:#91CBFF">length</span><span style="color:#F0F3F6">; i</span><span style="color:#FF9492">++</span><span style="color:#F0F3F6">) {</span></span>
+<span class="line"><span style="color:#91CBFF">    DEC</span><span style="color:#F0F3F6">[i] </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> ENC</span><span style="color:#F0F3F6">[i] </span><span style="color:#FF9492">^</span><span style="color:#91CBFF"> KEY</span><span style="color:#F0F3F6">[i </span><span style="color:#FF9492">%</span><span style="color:#91CBFF"> KEY</span><span style="color:#F0F3F6">.</span><span style="color:#91CBFF">length</span><span style="color:#F0F3F6">];</span></span>
+<span class="line"><span style="color:#F0F3F6">}</span></span>
+<span class="line"><span style="color:#FF9492">const</span><span style="color:#91CBFF"> FLAG</span><span style="color:#FF9492"> =</span><span style="color:#FF9492"> new</span><span style="color:#DBB7FF"> TextDecoder</span><span style="color:#F0F3F6">().</span><span style="color:#DBB7FF">decode</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">DEC</span><span style="color:#F0F3F6">);</span></span></code></pre>
+<p>Which is a simple XOR between these two arrays.</p>
+<p>I copied the arrays into a Python script where they were evaluated and xored together, producing the flag.</p>
+<h3 id="crypto---cascader">Crypto - Cascader</h3>
+<p>“Just found this super cool key exchange protocol while scrolling Hacker News between meetings</p>
+<p>It’s based on some clean recurrence math — none of that dinosaur-era number theory stuff finally, crypto that doesn’t look like it was invented in the 70s</p>
+<p>It came with a working implementation too, so i plugged it right in and shipped to prod</p>
+<p>A few people said I should’ve used something more “proven” but honestly… this just feels right</p>
+<p>Anyway, i packaged it into a challenge. Curious to see what the skeptics say now”</p>
+<hr>
+<p>This challenge came with 3 files.</p>
+<p><a href="/blog/fortid-ctf-writeup/assets/crypto-cascader.pdf">cascader.pdf</a>, a research paper on a novel key-exchange protocol by Anders Lindman</p>
+<p><a href="/blog/fortid-ctf-writeup/assets/crypto-cascader-chall.txt">chall.js</a>, which implemented the key-exchange protocol.</p>
+<p><a href="/blog/fortid-ctf-writeup/assets/crypto-cascader-output.txt">output.txt</a>, with a redacted key-exchange protocol:</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Alice private  &#x3C;REDACTED></span></span>
+<span class="line"><span>Bob private  &#x3C;REDACTED></span></span>
+<span class="line"><span>Alice public  81967497404473670873986762408662347640688858544889917659709378751872081150739</span></span>
+<span class="line"><span>Bob public  25638634989672271296647305730621408042240305773269414164982933528002524403752</span></span>
+<span class="line"><span>Alice Shared  &#x3C;REDACTED></span></span>
+<span class="line"><span>Bob Shared  &#x3C;REDACTED></span></span>
+<span class="line"><span>Alice's and Bob's shared secrets equal?  true</span></span>
+<span class="line"><span>ct (hex):    e2f84b71e84c8d696923702ddb1e35993e9108289e2d14ae8f05441ad48d1a67ead74f5f230d39dbfaae5709448c2690237ac6ab88fc26c8f362284d1e8063491d63f7c15cc3b024c62b5069605b73dd2c54fdcb2823c0c235b20e52dc5630c5f3</span></span></code></pre>
+<p>This appears to be a <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Diffie-Hellman</a>-style exchange between our old friends Alice and Bob.</p>
+<h4 id="crash-course-cryptography--key-exchange-protocols">Crash Course: Cryptography &#x26; Key-Exchange Protocols</h4>
+<p>Basically, Alice and Bob are our go-to characters for participants in cryptographic protocols. One important type of protocol are key-exchange protocols where the participants share a secret code word. The problem is we assume any communication between Alice and Bob can be listened into by an attacker (typically named Mallory, for malicious, or Eve, for evil). So we need a way for them to both have this secret code word, without ever telling each other.</p>
+<p>You might wonder why can’t they communicate privately? Why don’t they just encrypt their messages when they share this code word? Well, a key exchange is essential to encryption. Bob can’t decrypt Alice’s messages without knowing the secret key she used to encrypt that message.</p>
+<p>You might be familiar with a Caesar cipher, where letters are shifted by a certain number (e.g. 3. A → D, B → E, C → F …). If Alice sends an encrypted message to Bob like</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Olssv Dvysk</span></span></code></pre>
+<p>Bob would have no idea what this means unless he knew the secret number. For this message, the secret number is 7, so Bob can unshift the original message by 7 to reveal what Alice sent.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Olssv Dvysk</span></span>
+<span class="line"><span>Hello World</span></span></code></pre>
+<p>Alice and Bob had to share the 7, “the secret code word” or secret key, in order to be able to communicate through encrypted means.</p>
+<p>Now, a Caesar cipher isn’t a secure encryption method. The private key only has 25 options (excluding the 0 or 26 shift which would leave the message unchanged) so it can easily be broken by trying all possible keys like <a href="https://gchq.github.io/CyberChef/#recipe=ROT13_Brute_Force%28true,true,false,100,0,true,&#x27;&#x27;%29&#x26;input=T2xzc3YgRHZ5c2s">this on CyberChef</a>. However even with algorithms that cannot (yet) be brute-forced like Advanced Encryption Standard (<a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">AES</a>), the cipher used to secure a lot of data today, requires a shared secret key to perform its operations.</p>
+<p>So we can’t encrypt communications between Alice and Bob because we need to exchange a key to encrypt communications. Now, how do we do this safely, especially if we assume Mallory is intercepting our unencrypted messages?</p>
+<p>Short answer: math.</p>
+<a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/crypto-cascader-diffie-hellman-key-exchange.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/crypto-cascader-diffie-hellman-key-exchange.png" alt="Diagram of diffie-hellman key-exchange" width="900" loading="lazy">
+  </picture>
+</a>
+<p>Alice and Bob don’t actually exchange this shared secret key in public at all. Rather, they share just enough information to let the other participant produce the secret key when combined with some secret information each participant keeps private. Mallory can grab the information shared publicly, but because she never has the secret information so she can’t create the secret key herself. And that’s the idea behind the Diffie-Hellman exchange. <a href="https://www.youtube.com/watch?v=NmM9HA2MQGI">This video on DHKE</a> does a good job explaining both the intuition and the math behind this protocol.</p>
+<p>The important thing is we have a method share keys securely and, more importantly for this challenge, the Cascader key exchange protocol is not a secure method.</p>
+<h4 id="breaking-the-cascader">Breaking the Cascader</h4>
+<p>The Cascader has Alice and Bob pick their secret numbers (private keys) and a shared starting number called the seed. They combine their secret numbers with this seed using function called <code>LinearRecurrence</code> with the seed. They swap these public numbers and use their own secret again with this <code>LinearRecurrence</code>, seeded by their counterparty’s public number, to produce the same secret key, without ever sharing their secret numbers publicly.</p>
+<p>This sounds just like Diffie-Hellman. So where does it go wrong?</p>
+<p>Well, we don’t actually need the secret numbers to figure out the secret key… oops.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#FF9492">function</span><span style="color:#DBB7FF"> linearRecurrence</span><span style="color:#F0F3F6">(</span><span style="color:#FFB757">seed</span><span style="color:#F0F3F6">, </span><span style="color:#FFB757">exponents</span><span style="color:#F0F3F6">) {</span></span>
+<span class="line"><span style="color:#FF9492">    let</span><span style="color:#F0F3F6"> result </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> seed;</span></span>
+<span class="line"><span style="color:#FF9492">    let</span><span style="color:#F0F3F6"> exp </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 1</span><span style="color:#FF9492">n</span><span style="color:#F0F3F6">;</span></span>
+<span class="line"><span style="color:#FF9492">    while</span><span style="color:#F0F3F6"> (exponents </span><span style="color:#FF9492">></span><span style="color:#91CBFF"> 0</span><span style="color:#FF9492">n</span><span style="color:#F0F3F6">) {</span></span>
+<span class="line"><span style="color:#FF9492">        if</span><span style="color:#F0F3F6"> (exponents </span><span style="color:#FF9492">%</span><span style="color:#91CBFF"> 2</span><span style="color:#FF9492">n</span><span style="color:#FF9492"> ===</span><span style="color:#91CBFF"> 1</span><span style="color:#FF9492">n</span><span style="color:#F0F3F6">) {</span></span>
+<span class="line"><span style="color:#FF9492">            let</span><span style="color:#F0F3F6"> mult </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 1</span><span style="color:#FF9492">n</span><span style="color:#F0F3F6">;</span></span>
+<span class="line"><span style="color:#FF9492">            for</span><span style="color:#F0F3F6"> (</span><span style="color:#FF9492">let</span><span style="color:#F0F3F6"> i </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 0</span><span style="color:#F0F3F6">; i </span><span style="color:#FF9492">&#x3C;</span><span style="color:#F0F3F6"> exp; i</span><span style="color:#FF9492">++</span><span style="color:#F0F3F6">) {</span></span>
+<span class="line"><span style="color:#F0F3F6">                result </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 3</span><span style="color:#FF9492">n</span><span style="color:#FF9492"> *</span><span style="color:#F0F3F6"> result </span><span style="color:#FF9492">*</span><span style="color:#F0F3F6"> mult </span><span style="color:#FF9492">%</span><span style="color:#91CBFF"> MOD</span><span style="color:#F0F3F6">;</span></span>
+<span class="line"><span style="color:#F0F3F6">                mult </span><span style="color:#FF9492">&#x3C;&#x3C;=</span><span style="color:#91CBFF"> 1</span><span style="color:#FF9492">n</span><span style="color:#F0F3F6">;</span></span>
+<span class="line"><span style="color:#F0F3F6">            }</span></span>
+<span class="line"><span style="color:#F0F3F6">        }</span></span>
+<span class="line"><span style="color:#F0F3F6">        exponents </span><span style="color:#FF9492">>>=</span><span style="color:#91CBFF"> 1</span><span style="color:#FF9492">n</span><span style="color:#F0F3F6">;</span></span>
+<span class="line"><span style="color:#F0F3F6">        exp</span><span style="color:#FF9492">++</span><span style="color:#F0F3F6">;</span></span>
+<span class="line"><span style="color:#F0F3F6">    }</span></span>
+<span class="line"><span style="color:#FF9492">    return</span><span style="color:#F0F3F6"> result;</span></span>
+<span class="line"><span style="color:#F0F3F6">}</span></span></code></pre>
+<p>So the <code>1n, 2n, 3n</code> stuff is just how JavaScript handles big integers. Like how <code>1, 2, 3</code> needs to be <code>1.0, 2.0, 3.0</code> to have floats, we need <code>1n, 2n, 3n</code> to have big integers of that value, but you can just ignore the suffixes.</p>
+<p>We have the seed (the initial value), exponents (which we use as an iterator), and MOD (a large prime number). After initializing the variables, our main loop processes exponents bit-by-bit. It runs by dividing exponents by 2, until it reaches 0. So it makes $log_2(\text{exponents})$ iterations and each time exp increments up from 0 to this number.</p>
+<p>Then within the loop it checks whether the current bit is 1 (<code>if (exponents % 2n === 1n)</code>), and if it is we perform an unusual operation. We define mult which is initially 1, but grows by doubling <code>1, 2, 4, 8 ...</code>. In a new loop, it takes result, which initially stores the seed, times 3 times mult modulo MOD, and does this exp times.</p>
+<p>Basically this whole process decomposes exponents into its bits, and performs this “inner multiplication and doubling” procedure a certain number of times, depending on the location of the 1s. This looks complicated and is confusing, but it has predictable patterns. And patterns are the problem cryptography is tasked with solving. Good cryptography destroys patterns irreversibly and bad cryptography leaves a trace we can follow.</p>
+<h5 id="the-math-behind-the-attack"><strong>The Math Behind the Attack</strong></h5>
+<p>This complicated product (with the doubling or tripling), lets call it $P(x)$, actually preserves linear relationships and is limited to produce results of the form $(3^i \cdot 2^j) \mod \text{MOD}$.</p>
+<p>So the <code>LinearRecurrence</code> function produces something like:</p>
+<p>$$
+\text{LinearRecurrence}(\text{seed}, x) = \text{seed} \cdot P(x) \mod \text{MOD}
+$$</p>
+<p>We ran this function first to produce the public numbers for Alice and Bob:</p>
+<p>Let’s say A and B are Alice and Bob’s public numbers and a and b are their secret numbers.</p>
+<p>Then we generate A and B with</p>
+<p>$$
+\text{LinearRecurrence}(\text{seed}, a) = \text{seed} \cdot P(a) \mod \text{MOD} = A
+$$</p>
+<p>$$
+\text{LinearRecurrence}(\text{seed}, b) = \text{seed} \cdot P(b) \mod \text{MOD} = B
+$$</p>
+<p>To get the secret key, Alice will seed <code>LinearRecurrance</code> with Bob’s public number and run it again.</p>
+<p>$$
+\text{LinearRecurrence}(B, a) = B \cdot P(a) \mod \text{MOD}
+$$</p>
+<p>Note that $B = \text{seed} \cdot P(b) \mod \text{MOD}$ so</p>
+<p>$$
+(\text{seed} \cdot P(b) \mod \text{MOD}) \cdot P(a) \mod \text{MOD} = \text{seed} \cdot P(b) \cdot P(a) \mod \text{MOD} = \text{Secret key}
+$$</p>
+<p>Bob can do a similar operation with Alice’s public number.</p>
+<p>$$
+\text{LinearRecurrence}(A, b) = A \cdot P(b) \mod \text{MOD} = \text{seed} \cdot P(a) \cdot P(b) \mod \text{MOD} = \text{Secret key}
+$$</p>
+<p>And get the same secret key. Pretty cool. But is it secure?</p>
+<p>Remember we have the seed and their public numbers. We can multiply these public numbers together.</p>
+<p>$$
+A \times B = \text{seed}^2 \cdot P(a) \cdot P(b) \mod \text{MOD}
+$$</p>
+<p>We can find the modular inverse of the seed to basically undo the multiplication.</p>
+<p>$$
+(A \times B) \times \text{seed}^{-1} = \text{seed} \cdot P(a) \cdot P(b) \mod \text{MOD} = \text{Secret key}
+$$</p>
+<p>So using public information (A, B, and the seed) and a little <a href="https://en.wikipedia.org/wiki/Fermat%27s_little_theorem">math</a>, we can recreate the secret key which means we can break the whole security of the key exchange.</p>
+<h5 id="implementing-the-attack"><strong>Implementing the Attack</strong></h5>
+<p>From here implementing this is fairly simple. We just need to grab the data from output.txt. Apply Fermat’s Little Theorem. And then decrypt the ciphertext with AES.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> re</span></span>
+<span class="line"><span style="color:#FF9492">from</span><span style="color:#F0F3F6"> pathlib </span><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> Path</span></span>
+<span class="line"><span style="color:#FF9492">from</span><span style="color:#F0F3F6"> hashlib </span><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> sha256</span></span>
+<span class="line"><span style="color:#FF9492">from</span><span style="color:#F0F3F6"> cryptography.hazmat.primitives.ciphers.aead </span><span style="color:#FF9492">import</span><span style="color:#91CBFF"> AESGCM</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">txt </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> Path(</span><span style="color:#ADDCFF">"output.txt"</span><span style="color:#F0F3F6">).read_text()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">alice_pub </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> int</span><span style="color:#F0F3F6">(re.search(</span><span style="color:#FF9492">r</span><span style="color:#ADDCFF">"Alice public</span><span style="color:#91CBFF">\s</span><span style="color:#FF9492">+</span><span style="color:#91CBFF">([</span><span style="color:#FF9492">0-9</span><span style="color:#91CBFF">]</span><span style="color:#FF9492">+</span><span style="color:#91CBFF">)</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">, txt).group(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">))</span></span>
+<span class="line"><span style="color:#F0F3F6">bob_pub   </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> int</span><span style="color:#F0F3F6">(re.search(</span><span style="color:#FF9492">r</span><span style="color:#ADDCFF">"Bob public</span><span style="color:#91CBFF">\s</span><span style="color:#FF9492">+</span><span style="color:#91CBFF">([</span><span style="color:#FF9492">0-9</span><span style="color:#91CBFF">]</span><span style="color:#FF9492">+</span><span style="color:#91CBFF">)</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">, txt).group(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">))</span></span>
+<span class="line"><span style="color:#F0F3F6">ct_hex    </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> re.search(</span><span style="color:#FF9492">r</span><span style="color:#ADDCFF">"ct </span><span style="color:#72F088;font-weight:bold">\(</span><span style="color:#ADDCFF">hex</span><span style="color:#72F088;font-weight:bold">\)</span><span style="color:#ADDCFF">:</span><span style="color:#91CBFF">\s</span><span style="color:#FF9492">*</span><span style="color:#91CBFF">([</span><span style="color:#FF9492">0-9a-fA-F</span><span style="color:#91CBFF">]</span><span style="color:#FF9492">+</span><span style="color:#91CBFF">)</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">, txt).group(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">KEY_SIZE_BITS</span><span style="color:#FF9492"> =</span><span style="color:#91CBFF"> 256</span></span>
+<span class="line"><span style="color:#91CBFF">MAX_INT</span><span style="color:#FF9492"> =</span><span style="color:#91CBFF"> 1</span><span style="color:#FF9492"> &#x3C;&#x3C;</span><span style="color:#91CBFF"> KEY_SIZE_BITS</span></span>
+<span class="line"><span style="color:#91CBFF">MOD</span><span style="color:#FF9492"> =</span><span style="color:#91CBFF"> MAX_INT</span><span style="color:#FF9492"> -</span><span style="color:#91CBFF"> 189</span></span>
+<span class="line"><span style="color:#91CBFF">SEED</span><span style="color:#FF9492"> =</span><span style="color:#91CBFF"> MAX_INT</span><span style="color:#FF9492"> //</span><span style="color:#91CBFF"> 5</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">inv_seed </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> pow</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">SEED</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">MOD</span><span style="color:#FF9492">-</span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">MOD</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#F0F3F6">shared </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> (alice_pub </span><span style="color:#FF9492">*</span><span style="color:#F0F3F6"> bob_pub </span><span style="color:#FF9492">*</span><span style="color:#F0F3F6"> inv_seed) </span><span style="color:#FF9492">%</span><span style="color:#91CBFF"> MOD</span></span>
+<span class="line"><span style="color:#F0F3F6">shared_bytes </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> shared.to_bytes(</span><span style="color:#91CBFF">32</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"big"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">aes_key </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> sha256(shared_bytes).digest()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">data </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> bytes</span><span style="color:#F0F3F6">.fromhex(ct_hex)</span></span>
+<span class="line"><span style="color:#F0F3F6">iv </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> data[:</span><span style="color:#91CBFF">12</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"><span style="color:#F0F3F6">tag </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> data[</span><span style="color:#FF9492">-</span><span style="color:#91CBFF">16</span><span style="color:#F0F3F6">:]</span></span>
+<span class="line"><span style="color:#F0F3F6">ciphertext </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> data[</span><span style="color:#91CBFF">12</span><span style="color:#F0F3F6">:</span><span style="color:#FF9492">-</span><span style="color:#91CBFF">16</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">aesgcm </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> AESGCM(aes_key)</span></span>
+<span class="line"><span style="color:#FF9492">try</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">    plaintext </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> aesgcm.decrypt(iv, ciphertext </span><span style="color:#FF9492">+</span><span style="color:#F0F3F6"> tag, </span><span style="color:#91CBFF">None</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(plaintext.decode(</span><span style="color:#ADDCFF">'utf-8'</span><span style="color:#F0F3F6">))</span></span>
+<span class="line"><span style="color:#FF9492">except</span><span style="color:#91CBFF"> Exception</span><span style="color:#FF9492"> as</span><span style="color:#F0F3F6"> e:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Decryption failed:"</span><span style="color:#F0F3F6">, e)</span></span></code></pre>
+<h3 id="intro---misc">Intro - Misc</h3>
+<p>This picture seems oddly familiar… but something about it feels ever so slightly off.</p>
+<hr>
+<p>I didn’t actually solve this one. A teammate actually finished it first, but I was really close.</p>
+<p>We were given <code>about-us.webp</code></p>
+<a href="https://images.google.com/">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/intro-misc-about-us-webp.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/intro-misc-about-us-webp.webp" alt="About Us dot Webp" width="900" loading="lazy">
+  </picture>
+</a>
+<p>I was able to reverse image search and find a LinkedIn post of the same image.</p>
+<a href="https://www.linkedin.com/posts/petra-krizan-7035a4126_fortid-digitalidentity-eudi-activity-7331341089565495296-FG8b/">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/intro-misc-about-us-jpg.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/intro-misc-about-us.jpg" alt="About Us dot Jpg" width="900" loading="lazy">
+  </picture>
+</a>
+<p>Which visually appeared to be the same image, but applying a filter like what I found here</p>
+<a href="https://www.diffchecker.com/image-compare/">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/intro-misc-about-us-diff.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/intro-misc-about-us-diff.png" alt="About Us differences" width="900" loading="lazy">
+  </picture>
+</a>
+<p>Little dots appeared indicating tiny modifications throughout the image. I thought had a vague idea about the steganography going on, but also these looked like possible normal photo edits. Or maybe some small edits were made to the binary to hide the flag. I wasn’t sure, but I stepped away from it to work on something else and in that time my teammates cracked it.</p>
+<p>They used a <a href="https://futureboy.us/stegano/compinput.html">random website</a> with a the same photo taken from the company website instead of LinkedIn which immediately revealed the flag.</p>
+<p>I had the right idea, wrong image. The differences in resolution resulted in those tiny dots, where if I had the right image and checked their differences I would’ve seen the flag.</p>
+<h3 id="misc---meta-20">Misc - Meta 2.0</h3>
+<p>“Data science is old news, kids today are all about metadata science…</p>
+<p><a href="https://fortid-meta.chals.io/">https://fortid-meta.chals.io/</a>”</p>
+<hr>
+<p>This isn’t much of a writeup. I got lucky.</p>
+<p>This came with handout.zip which had a <code>Dockerfile</code> for setting up the environment, <code>app.py</code> with python source code for this web page which apparently had an arbitrary file write vulnerability and some other stuff.</p>
+<p>This web page allows you to upload a file and it produces the metadata from that file.</p>
+<a href="https://fortid-meta.chals.io/">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/misc-meta-2.0-webpage.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/misc-meta-2.0-webpage.png" alt="FortID Meta 2.0 Challenge Webpage" width="900" loading="lazy">
+  </picture>
+</a>
+<p>And so I started just uploading random files I had to just poke around. And so I uploaded stuff from this challenge and other challenges like <code>app.py</code>, <code>Dockerfile</code>, <code>requirements.txt</code> and <code>about-us.jpg</code>.</p>
+<p>Uploading <code>about-us.jpg</code> got me the flag.</p>
+<a href="https://fortid-meta.chals.io/">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/misc-meta-2.0-solve.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/misc-meta-2.0-solve.png" alt="FortID Meta 2.0 Solved" width="900" loading="lazy">
+  </picture>
+</a>
+<p>I’m not sure why, but I’m not complaining.</p>
+<h3 id="misc---hard-rock">Misc - Hard Rock</h3>
+<p>”Such an Ohio-core song, giving sigma rizz to a lore-drop nobody asked for.</p>
+<p>Flag format: <code>FORTID{...}</code>”</p>
+<hr>
+<p>We were given <code>secret.mp3</code>,  which means this is likely an audio steganography challenge. It had some music with a constant high pitched sound in the background and it was just over 17 minutes long.</p>
+<p>I used <a href="https://www.sonicvisualiser.org/">Sonic Visualizer</a> and discovered the high pitched sound was in channel 1 (left) and the music in channel 2 (right). Looking at 10,000 Hz in a spectrogram I could a strong constant pitch and then about 600-700 Hz above and below this was a faint pattern.</p>
+<picture>
+  <source srcset="/blog/fortid-ctf-writeup/images/misc-hard-rock-morse-code.webp" type="image/webp">
+  <img src="/blog/fortid-ctf-writeup/assets/misc-hard-rock-morse-code.png" alt="Spectograph with morse code" width="900" loading="lazy">
+</picture>
+<p>Morse code. 17 minutes of it. Non-audible, barely visible.</p>
+<p>I used some python to generate and split the spectrogram into images, each 30 seconds long. I tried inputting the images to visual morse code solvers and when that I didn’t work I attempted various enhancement methods, but wasn’t quite able to automate it.</p>
+<p>I decoded the first few letters “PLUSPLUSPLUS” and realized this was an esoteric programming language, <a href="https://en.wikipedia.org/wiki/Brainfuck">BrainF***</a>. A teammate took over trying to enhance and automate processing the images while I started decoding on and off by hand. Fortunately they managed to automate and solved this one before I finished doing it by hand.</p>
+<h3 id="misc---osint-exam">Misc - OSINT Exam</h3>
+<p>“Can you pass our OSINT certification exam?</p>
+<p><code>nc 0.cloud.chals.io 27689</code>”</p>
+<hr>
+<p>We were handed a zip folder with 6 images and the app running on that port posted an OSINT question and the answer format. Each question had to be answered before moving onto the next image.</p>
+<h4 id="location-1">Location 1</h4>
+<picture>
+  <source srcset="/blog/fortid-ctf-writeup/images/misc-osint_exam-location_1.webp" type="image/webp">
+  <img src="/blog/fortid-ctf-writeup/assets/misc-osint_exam-location_1.jpg" alt="OSINT exam location" width="900" loading="lazy">
+</picture>
+Q: One of our branch headquarters is located @ {location1.png}. What is the full name of that coworking space and who is the managing director of that branch?
+<p>Format: &#x3C;name_of_coworking_space> &#x3C;managing_director_name> &#x3C;managing_director_surname></p>
+<hr>
+<p>A reverse image search immediately revealed several posts that this was the LHoFT. That is the Luxemburg House of Technology (great name!). I misunderstood the question and I was looking for the managing director of LHoFT, but couldn’t find anyone with that title.</p>
+<p>My teammates found the managing director of Blockhouse Technology at the LHoFT branch pretty quickly on the LHoFT website.</p>
+<h4 id="location-2">Location 2</h4>
+<picture>
+  <source srcset="/blog/fortid-ctf-writeup/images/misc-osint_exam-location_2.webp" type="image/webp">
+  <img src="/blog/fortid-ctf-writeup/assets/misc-osint_exam-location_2.jpg" alt="OSINT exam location" width="900" loading="lazy">
+</picture>
+Q: One of our branch headquarters is located @ {location2.png}. What is the full address of that building?
+<p>Format: &#x3C;house_number> &#x3C;street_name> &#x3C;town> &#x3C;postcode> &#x3C;country></p>
+<hr>
+<p>Initially, I thought it was the Kipling house due to a reverse image search, but I didn’t have the question at that time (before we solved Q1). Since we know we’re looking at Blockhouse Technology branches and the architecture appears to match several locations in the UK/Oxford, I tried a little google dorking. Searching “Blockhouse technology” UK office located the LinkedIn page with the correct address (<a href="https://www.linkedin.com/company/blockhouse-technology-ltd/?originalSubdomain=uk">linkedin</a>). My teammates cracked this one first using similar methods.</p>
+<h4 id="location-3">Location 3</h4>
+<picture>
+  <source srcset="/blog/fortid-ctf-writeup/images/misc-osint_exam-location_3.webp" type="image/webp">
+  <img src="/blog/fortid-ctf-writeup/assets/misc-osint_exam-location_3.jpg" alt="OSINT exam location" width="900" loading="lazy">
+</picture>
+Q: Our branch with the best BBQ is located @ {location3.png}. What is the full address of that building?
+<p>Format: &#x3C;street_name> &#x3C;house number> &#x3C;postcode> &#x3C;town> &#x3C;country></p>
+<hr>
+<p>My teammates also cracked this one, while I was working on Intro - Crypto.</p>
+<p>Reverse image search yielded nothing. We already had two offices in the UK and Luxembourg, but the Zagreb office in Croatia hadn’t been mentioned. Just a little Google Dorking was all it took to find the address, which happened to be correct.</p>
+<h4 id="location-4">Location 4</h4>
+<picture>
+  <source srcset="/blog/fortid-ctf-writeup/images/misc-osint_exam-location_4.webp" type="image/webp">
+  <img src="/blog/fortid-ctf-writeup/assets/misc-osint_exam-location_4.png" alt="OSINT exam location" width="900" loading="lazy">
+</picture>
+Q: Two of our team members ran a road race together earlier this year @ {location4.png}. What city was the race at and what were their finish times (hh:mm:ss)?
+<p>Format: &#x3C;city> &#x3C;slower_result> &#x3C;faster_result></p>
+<hr>
+<p>My teammates had found a <a href="https://www.greatrun.org/">website</a> to lookup race times. And they had the Blockhouse Technology company page on LinkedIn. They started checking employees, but ran into an issue. Many accounts had blank photos and names redacted as “LinkedIn Member”. But I knew what to do. I popped it open under my account and everyone’s names and images popped up. Even though they were all the way across the world in Croatia, some were 3rd degree connections. I suspect due to being connected with a few people from Romania who I interviewed for my <a href="https://www.foundersascent.com/">podcast</a>. Because of this link (or some other random connection), LinkedIn permitted me access to their profiles.</p>
+<p>Yeah. You need to be LinkedIn-maxing for OSINT challenges.</p>
+<p>After trying a couple names, we tracked down the guy on the left. His LinkedIn profile picture was a bad angle and he had no facial hair and looked younger, so it took longer than it should’ve and we weren’t even sure it was him.</p>
+<p>I used a facial recognition website to find a similar image, but the site only shared the top level domain unless I paid. But that was enough, with some Google Dorking.
+I searched: <code>site:https://ioinformatics.org/ "ivan paljak"</code> and only got 1 search result.</p>
+<a href="https://stats.ioinformatics.org/people/6195">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/misc-osint-exam-q4-solve.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/misc-osint-exam-q4-solve.png" alt="IOI Profile" width="900" loading="lazy">
+  </picture>
+</a>
+<p>His profile for the International Olympiad in Informatics, which matched a clearer picture to his name and his LinkedIn profile. We pulled his time from the race website and started looking for his friend.</p>
+<p>But all of our previous methods failed.</p>
+<p>We were convinced he had no online presence.</p>
+<p>But then my teammates noted an interesting username on the FortID CTF discord server.</p>
+<p>ipaljak. An Admin. Ivan Paljak was in the discord.</p>
+<p>The Blockhouse staff are the ones running the CTF. Its very possible that the other guy in the photo is also an Admin. We started cross referencing the discord Administrator usernames with the staff until one name hit on the race website.</p>
+<a href="https://www.greatrun.org/photos/">
+  <picture>
+    <source srcset="/blog/fortid-ctf-writeup/images/misc-osint-exam-q4-solve2.webp" type="image/webp">
+    <img src="/blog/fortid-ctf-writeup/assets/misc-osint-exam-q4-solve2.png" alt="Race Photos" width="900" loading="lazy">
+  </picture>
+</a>
+<p>And there he was. We grabbed the times and moved on to the next question.</p>
+<h4 id="location-5">Location 5</h4>
+<picture>
+  <source srcset="/blog/fortid-ctf-writeup/images/misc-osint_exam-location_5.webp" type="image/webp">
+  <img src="/blog/fortid-ctf-writeup/assets/misc-osint_exam-location_5.png" alt="OSINT exam location" width="900" loading="lazy">
+</picture>
+Q: The squad from our Zagreb office took part in a local charity futsal tournament in 2024 @ {location_5.png}. What was the tournament called and what place did they win?
+<p>Format: &#x3C;tournament_name> &#x3C;place_won></p>
+<hr>
+<p>My teammate, <a href="https://linkedin.com/in/celina-rodriguez-1773201b4">Celina</a>, cracked this one. In her own words:</p>
+<p>“For 5, I found it through the e student hint in the photo. E student is a student organization that organizes the Kopacka Solidarnosti futsal tournament that happens to go to a non profit. The website only had information on the tournament from 2023 but some google dorking led me to a LinkedIn page from the winners of the 2024 tournament confirming there was a tournament that year. Then just guessing and checking the placements 😆”</p>
+<h4 id="location-6">Location 6</h4>
+<picture>
+  <source srcset="/blog/fortid-ctf-writeup/images/misc-osint_exam-location_6.webp" type="image/webp">
+  <img src="/blog/fortid-ctf-writeup/assets/misc-osint_exam-location_6.jpg" alt="OSINT exam location" width="900" loading="lazy">
+</picture>
+Q: One of our senior members has an artistic side to them as you can see from the beautiful flower @ {location6.png}. What is the name of the book with that member's self-portrait on its cover?
+<p>Format: &#x3C;book title></p>
+<hr>
+<p>This one actually was probably the easiest. We already had the senior staff from browsing the Blockhouse Technology website. Basic Google Dorking by searching: <code>“insert name” book</code> immediately found the textbook.</p>
+<p>And closed a very fun and challenging OSINT series. OSINT are one of my favorite categories because they are some of the most collaborative CTF challenges and everyone seems to have a unique approach that can contribute to the search.</p> </article> <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"> <a href="/blog/the-greatest-controversy-in-cyber" class="group p-4 gap-3 flex items-center border rounded-lg border-white/20 hover:bg-white/10 blend transition-colors duration-300 ease-in-out"> <div class="order-2 w-full h-full group-hover:text-white blend"> <div class="flex flex-wrap gap-2"> <div class="text-sm uppercase">
+Prev
+</div> </div> <div class="font-semibold mt-3 text-white"> The Greatest Controversy in Tech: Is Cybersecurity One Word or Two? </div> </div> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="order-1 stroke-current group-hover:stroke-white rotate-180"> <line x1="5" y1="12" x2="19" y2="12" class="scale-x-0 group-hover:scale-x-100 translate-x-4 group-hover:translate-x-1 transition-all duration-300 ease-in-out"></line> <polyline points="12 5 19 12 12 19" class="translate-x-0 group-hover:translate-x-1 transition-all duration-300 ease-in-out"></polyline> </svg> </a> <a href="/blog/the-greatest-controversy-in-cyber" class="group p-4 gap-3 flex items-center border rounded-lg border-white/20 hover:bg-white/10 blend transition-colors duration-300 ease-in-out"> <div class="w-full h-full text-right group-hover:text-white blend"> <div class="text-sm uppercase">
+Next
+</div> <div class="font-semibold mt-3 text-white"> The Greatest Controversy in Tech: Is Cybersecurity One Word or Two? </div> </div> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="stroke-current group-hover:stroke-white"> <line x1="5" y1="12" x2="19" y2="12" class="scale-x-0 group-hover:scale-x-100 translate-x-4 group-hover:translate-x-1 transition-all duration-300 ease-in-out"></line> <polyline points="12 5 19 12 12 19" class="translate-x-0 group-hover:translate-x-1 transition-all duration-300 ease-in-out"></polyline> </svg> </a> </div> </div> </div>   </div> </div>  </main> <footer class="relative bg-black"> <div class="animate"> <section class="py-5"> <div class="w-full h-full mx-auto px-5 max-w-screen-md">  <div class="flex items-center justify-center sm:justify-end"> <button id="back-to-top" aria-label="Back to top of page" class="group flex w-fit p-1.5 gap-1.5 text-sm items-center border rounded hover:bg-white/10 border-white/20 transition-colors duration-300 ease-in-out"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="stroke-current group-hover:stroke-white rotate-90"> <line x1="19" y1="12" x2="5" y2="12" class="scale-x-0 group-hover:scale-x-100 translate-x-3 group-hover:translate-x-0 transition-all duration-300 ease-in-out"></line> <polyline points="12 19 5 12 12 5" class="translate-x-1 group-hover:translate-x-0 transition-all duration-300 ease-in-out"></polyline> </svg> <div class="w-full group-hover:text-white transition-colors duration-300 ease-in-out">
+Back to top
+</div> </button> </div>  </div> </section> <section class="py-5 overflow-hidden whitespace-nowrap border-t border-white/25"> <div class="w-full h-full mx-auto px-5 max-w-screen-md">  <div class="h-full grid grid-cols-1 sm:grid-cols-2 gap-3"> <div class="order-2 sm:order-1 flex flex-col items-center justify-center sm:items-start"> <div class="text-sm mt-2 text-white">
+&copy; 2025 | All rights reserved
+</div> </div> <div class="order-1 sm:order-2 flex justify-center sm:justify-end"> <div class="flex flex-wrap gap-1 items-center justify-center"> <a href="https://www.linkedin.com/in/bj-/" target="_blank" aria-label="BJ's Bytes on LinkedIn" class="group size-10 rounded-full p-2 items-center justify-center hover:bg-white/20 blend"> <svg class="size-full fill-current group-hover:fill-white blend"> <use href="/images/social.svg#linkedin"></use> </svg> </a><a href="https://github.com/Auric115/" target="_blank" aria-label="BJ's Bytes on Github" class="group size-10 rounded-full p-2 items-center justify-center hover:bg-white/20 blend"> <svg class="size-full fill-current group-hover:fill-white blend"> <use href="/images/social.svg#github"></use> </svg> </a><a href="https://tryhackme.com/p/Auric115/" target="_blank" aria-label="BJ's Bytes on TryHackMe" class="group size-10 rounded-full p-2 items-center justify-center hover:bg-white/20 blend"> <svg class="size-full fill-current group-hover:fill-white blend"> <use href="/images/social.svg#tryhackme"></use> </svg> </a> </div> </div> </div>  </div> </section> </div> </footer> <script>
+  function goBackToTop(event) {
+    event.preventDefault()
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    })
+  }
+
+  function initializeBackToTop() {
+    const backToTop = document.getElementById("back-to-top")
+    backToTop?.addEventListener("click", goBackToTop)
+  }
+
+  document.addEventListener("astro:after-swap", initializeBackToTop)
+  initializeBackToTop()
+</script> </body></html>

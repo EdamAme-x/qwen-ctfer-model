@@ -1,0 +1,15 @@
+{
+  "name": "qwen-ctfer-model",
+  "private": true,
+  "packageManager": "bun@1.3.9",
+  "scripts": {
+    "hook:pre-commit": "python scripts/hook_pre_commit.py",
+    "hook:pre-push": "python scripts/hook_pre_push.py",
+    "install-hooks": "python scripts/install_hooks.py",
+    "create-worktrees": "python scripts/create_worktrees.py",
+    "smoke": "python scripts/run_smoke_pipeline.py",
+    "list-ctftime-writeups": "python scripts/list_ctftime_writeups.py",
+    "scrape-writeups": "python scripts/scrape_writeups.py",
+    "prepare-scrape-review": "python scripts/prepare_scrape_review.py"
+  }
+}

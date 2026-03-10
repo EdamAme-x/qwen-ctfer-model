@@ -89,6 +89,12 @@ def resolve_dtype(dtype_name: str | None) -> Any:
         raise ValueError(f"Unsupported torch dtype: {dtype_name}") from exc
 
 
+def normalize_no_split_modules_for_peft(model: Any) -> None:
+    no_split_modules = getattr(model, "_no_split_modules", None)
+    if isinstance(no_split_modules, set):
+        model._no_split_modules = sorted(no_split_modules)
+
+
 def load_model_and_tokenizer(config: dict[str, Any]) -> tuple[Any, Any]:
     from peft import PeftModel
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -116,6 +122,8 @@ def load_model_and_tokenizer(config: dict[str, Any]) -> tuple[Any, Any]:
     model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
     adapter_path = config.get("adapter_path")
     if adapter_path:
+        # PEFT's auto device-map path expects an ordered collection here.
+        normalize_no_split_modules_for_peft(model)
         model = PeftModel.from_pretrained(model, adapter_path)
     model.eval()
     return model, tokenizer

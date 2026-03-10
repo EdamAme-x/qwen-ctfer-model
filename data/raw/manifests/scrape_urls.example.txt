@@ -1,0 +1,5 @@
+# One URL per line.
+# Keep this file local or copy it to a non-example name for real scrape batches.
+# Raw scraped payloads stay under data/raw/scraped/ and should not be committed.
+
+https://example.com

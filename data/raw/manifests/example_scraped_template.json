@@ -24,6 +24,10 @@
       "defaults": {
         "system_prompt": "You are a CTF assistant working in an authorized sandbox. Be concise, evidence-first, and technical.",
         "source_bucket": "scraped_derivative",
+        "source_ledger_path": "data/raw/scraped/<batch_name>/review_ledger.jsonl",
+        "review_status": "approved_for_training",
+        "allowed_for_training": true,
+        "allowed_for_redistribution": false,
         "redistribution_status": "manual_review_required"
       }
     }

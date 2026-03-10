@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>CTFtime.org / 0xFUN CTF 2026 / VMware / Writeup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="description" content="CTF writeups, VMware">
+
+    <meta name="author" content="ctftime team">
+
+    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet"/>
+    <link href="/static/css/typeahead.bootstrap.css" rel="stylesheet"/>
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="/static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet"/>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/static/images/ctftime-logo-avatar.png">
+    <meta name="apple-mobile-web-app-title" content="CTFtime">
+    <meta name="application-name" content="CTFtime">
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
+    <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.formset.js"></script>
+    
+    <script src='https://www.google.com/recaptcha/api.js?render=6Lfl-uUUAAAAAFgA71MPRAPNGt8xQjV2C30BsoXT'></script>
+
+    
+<link rel="stylesheet" type="text/css" href="/static/css/highlight.min.css"></link>
+
+<script>
+    grecaptcha.ready(function() {
+        grecaptcha.execute('6Lfl-uUUAAAAAFgA71MPRAPNGt8xQjV2C30BsoXT', {action: 'comment'}).then(function(token) {
+    document.querySelectorAll('input.django-recaptcha-hidden-field').forEach(function (value) {
+        value.value = token;
+    });
+    return token;
+})
+    });
+</script>
+
+<script src="/static/js/highlight.min.js"></script>
+<script src="/static/js/purify.min.js"></script>
+<!--<script src="/static/js/remarkable.min.js"></script>-->
+<script src="/static/js/remarkable.js"></script>
+<!--<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>-->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+    <link href="/static/css/ctftime6.css" rel="stylesheet"/>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/cookieconsent.min.css" />
+    <script src="/static/js/cookieconsent.min.js"></script>
+    <script>
+        if (document.domain != "ctftime.org" && document.domain != "translate.googleusercontent.com"
+            && document.domain != "translate.baiducontent.com" && document.domain != "z5h64q92x9.net") {
+            window.location.replace("https://ctftime.org");
+        }
+    </script>
+    <!--<script data-ad-client="ca-pub-5718474707752821" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>-->
+  </head>
+
+
+  <body>
+
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="//ctftime.org/"><img src="/static/images/ct/logo.svg" alt="CTFtime.org" border="0" width="191px" /></a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li><a href="/ctfs">CTFs</a></li>
+              <li><a href="/event/list/upcoming">Upcoming</a></li>
+              <li class="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Archive  <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                  <li><a href="/event/list/past">Past events</a></li>
+                  <li><a href="/tasks/">Tasks</a></li>
+                  <li><a href="/writeups">Writeups</a></li>
+                  </ul>
+              </li>
+              <li><a href="/calendar/">Calendar</a></li>
+              <li class="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Teams  <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                  <li><a href="/stats/">Rating</a></li>
+                  <li><a href="/team/compare">Compare</a></li>
+                  <li><a href="/team/new/">Create new team</a></li>
+                  <li><a href="/dating">Get team members</a></li>
+                  </ul>
+              </li>
+              <li><a href="/faq/">FAQ</a></li>
+              <li class="dropdown">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contact us  <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                  <li><a href="/event/mail">For organizers</a></li>
+                  <li><a href="/feedback">Feedback</a></li>
+                  </ul>
+              </li>
+              <li><a href="/about/">About</a></li>
+            </ul>
+            <ul class="nav pull-right">
+            
+            <li class="divider-vertical"></li>
+                
+                <li><a href="#loginModal" data-toggle="modal">Sign in</a></li>
+                
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    
+
+<ul class="breadcrumb">
+    <li><a href="/">Home</a> <span class="divider">/</span></li>
+    <li><a href="/event/list/">CTF events</a> <span class="divider">/</span></li>
+    <li><a href="/event/3081">0xFUN CTF 2026</a> <span class="divider">/</span></li>
+    <li><a href="/event/3081/tasks/">Tasks</a></li> <span class="divider">/</span></li>
+    <li><a href="/task/31901">VMware</a> <span class="divider">/</span></li>
+    <li class="active">Writeup</li>
+</ul>
+
+
+    <div class="container">
+
+    
+
+    
+
+<div class="page-header">
+<h2>VMware</h2>
+by <a href="/user/232492">yunx1ao.</a> / <a href="/team/410251">Lappung</a> 
+</div>
+<div class="row">
+<div class="span7">
+
+<p>
+<b>Tags:</b> <span class="label label-info">forensics</span>&nbsp;
+</p>
+
+
+
+
+
+
+
+<p>Rating: <span id="user_rating" class="category-value">5.0</span></p>
+
+</div>
+
+<div class="span4">
+
+
+
+</div>
+    <div>
+
+    </div>
+</div>
+
+<div>
+
+
+    
+        <!-- markdown parser here -->
+        
+        <div class="well" id="id_description">
+        
+        <p>Original Writeup [here](<a href="https://hackmd.io/@EPIDaX-NTqKc4Xpu5lWmVQ/HJmv07Av-l" rel="nofollow">https://hackmd.io/@EPIDaX-NTqKc4Xpu5lWmVQ/HJmv07Av-l</a>)</p>
+        
+        </div>
+
+
+
+<div class="well"><a href="https://hackmd.io/@EPIDaX-NTqKc4Xpu5lWmVQ/HJmv07Av-l" target="_new" rel="nofollow noopener">Original writeup</a> (https://hackmd.io/@EPIDaX-NTqKc4Xpu5lWmVQ/HJmv07Av-l).</div>
+
+
+
+<div>
+        <!-- Go to www.addthis.com/dashboard to customize your tools -->
+        <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5e8866294de84cf7"></script>
+        <div class="addthis_inline_share_toolbox_ioch"></div>
+        <!-- AddThis Button END -->
+</div>
+
+</div>
+
+
+
+<div class="page-header">
+<h3>Comments</h3>
+</div>
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$']]}
+    });
+</script>
+
+
+<script type="text/javascript">
+$(function() {
+    $('#id_claim').click(function() {
+        if (confirm('Are you sure you want to be marked as the author of this writeup?')) {
+            $('#claim_form').submit();
+        }
+        return false;
+    });
+
+
+
+    hljs.initHighlightingOnLoad();
+
+    var MDConvert = new Remarkable({
+        highlight: function (str, lang) {
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    return hljs.highlight(lang, str).value;
+                } catch (err) {}
+            }
+            try {
+                return hljs.highlightAuto(str).value;
+            } catch (err) {}
+            return '';
+        }
+    });
+    var dirty = MDConvert.render('Original Writeup [here](https://hackmd.io/@EPIDaX\u002DNTqKc4Xpu5lWmVQ/HJmv07Av\u002Dl)');
+    var pretty_clean = DOMPurify.sanitize(dirty, {SAFE_FOR_JQUERY: true});
+    document.getElementById('id_description').innerHTML = pretty_clean;
+
+
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+        <div class="modal hide fade" id="loginModal">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal">x</button>
+        <h3>Sign in with</h3>
+    </div>
+    <div class="modal-body" align="center">
+        <a href="/login/google-oauth2/?next=/writeup/40681"><img src="/static/images/google.svg" class="icon_logon" alt="Enter using Google" /></a>
+        <a href="/login/twitter/?next=/writeup/40681"><img src="/static/images/twitter.svg"  class="icon_logon" alt="Enter using Twitter" /></a>
+        <a href="/login/facebook/?next=/writeup/40681"><img src="/static/images/facebook.svg"  class="icon_logon" alt="Enter using Facebook" /></a>
+        <a href="/login/github/?next=/writeup/40681"><img src="/static/images/github.svg"  class="icon_logon" alt="Enter using Github" /></a>
+        <p><a href="/amnesia">I don't remember</a></p>
+    </div>
+    </div>
+
+
+  <div class="row">
+    <div class="span4">
+    </div>
+  </div>
+
+    </div>
+
+
+    <footer class="footer">
+    <div class="container">
+      <p class="pull-right"><a href="//twitter.com/CTFtime" class="twitter-follow-button" data-show-count="false">Follow @CTFtime</a> </p>
+      <p>&copy; 2012 &mdash; 2025 CTFtime team.</p><p>All tasks and writeups are copyrighted by their respective authors. <a href="/privacy">Privacy Policy</a>.<br/>
+    Hosting provided by <a href="http://www.transdata.no/">Transdata</a>.</p>
+    </div>
+    </footer>
+
+
+    <script src="/static/bootstrap/js/bootstrap-transition.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-alert.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-modal.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-dropdown.js"></script>
+<!--    <script src="/static/bootstrap/js/bootstrap-scrollspy.js"></script>-->
+    <script src="/static/bootstrap/js/bootstrap-tab.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-tooltip.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-popover.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-button.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-collapse.js"></script>
+<!--    <script src="/static/bootstrap/js/bootstrap-carousel.js"></script>-->
+    <script src="/static/js/typeahead_f.js"></script>
+
+    <script type="text/javascript">
+        $('.dropdown-toggle').dropdown();
+
+        window.addEventListener("load", function () {
+            window.cookieconsent.initialise({
+                "palette": {
+                    "popup": {
+                        "background": "#efefef",
+                        "text": "#404040"
+                    },
+                    "button": {
+                        "background": "#fb0505"
+                    }
+                },
+                "position": "bottom-right",
+                "content": {
+                    "message": "This website uses cookies to manage authentication, for analytics, and other functions.",
+                    "link": "Privacy policy",
+                    "href": "https://ctftime.org/privacy"
+                }
+            })
+        });
+    </script>
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+(function (d, w, c) {
+    (w[c] = w[c] || []).push(function() {
+        try {
+            w.yaCounter14236711 = new Ya.Metrika({id:14236711, enableAll: true, webvisor:true});
+        } catch(e) {}
+    });
+    
+    var n = d.getElementsByTagName("script")[0],
+        s = d.createElement("script"),
+        f = function () { n.parentNode.insertBefore(s, n); };
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+
+    if (w.opera == "[object Opera]") {
+        d.addEventListener("DOMContentLoaded", f);
+    } else { f(); }
+})(document, window, "yandex_metrika_callbacks");
+</script>
+<noscript><div><img src="//mc.yandex.ru/watch/14236711" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-559211-27']);
+  _gaq.push(['_setDomainName', 'ctftime.org']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"f41de5a188974826ab97e9aa03b6a713","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
