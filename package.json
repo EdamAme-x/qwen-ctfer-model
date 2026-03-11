@@ -3,15 +3,16 @@
   "private": true,
   "packageManager": "bun@1.3.9",
   "scripts": {
-    "hook:pre-commit": "python scripts/hook_pre_commit.py",
-    "hook:pre-push": "python scripts/hook_pre_push.py",
-    "install-hooks": "python scripts/install_hooks.py",
-    "create-worktrees": "python scripts/create_worktrees.py",
-    "smoke": "python scripts/run_smoke_pipeline.py",
-    "list-ctftime-writeups": "python scripts/list_ctftime_writeups.py",
-    "scrape-writeups": "python scripts/scrape_writeups.py",
-    "prepare-scrape-review": "python scripts/prepare_scrape_review.py",
-    "transform-scraped-writeups": "python scripts/transform_scraped_writeups.py",
-    "build-writeup-dataset": "python scripts/build_writeup_dataset.py"
+    "hook:pre-commit": "bun scripts/run_python.js scripts/hook_pre_commit.py",
+    "hook:pre-push": "bun scripts/run_python.js scripts/hook_pre_push.py",
+    "install-hooks": "bun scripts/run_python.js scripts/install_hooks.py",
+    "create-worktrees": "bun scripts/run_python.js scripts/create_worktrees.py",
+    "smoke": "bun scripts/run_python.js scripts/run_smoke_pipeline.py",
+    "list-ctftime-writeups": "bun scripts/run_python.js scripts/list_ctftime_writeups.py",
+    "scrape-writeups": "bun scripts/run_python.js scripts/scrape_writeups.py",
+    "prepare-scrape-review": "bun scripts/run_python.js scripts/prepare_scrape_review.py",
+    "transform-scraped-writeups": "bun scripts/run_python.js scripts/transform_scraped_writeups.py",
+    "build-writeup-dataset": "bun scripts/run_python.js scripts/build_writeup_dataset.py",
+    "chat-local": "bun scripts/run_python.js scripts/chat_local.py"
   }
 }
