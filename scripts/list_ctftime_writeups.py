@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
 import json
 import re
 import sys
+import time
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
@@ -16,6 +18,7 @@ CTFTIME_WRITEUPS_URL = "https://ctftime.org/writeups"
 DEFAULT_USER_AGENT = (
     "qwen-ctfer-model/1.0 (+research enumeration for authorized CTF dataset building)"
 )
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 WRITEUP_LINK_RE = re.compile(r'href="(/writeup/\d+)"')
 ORIGINAL_LINK_RE = re.compile(
     r'Original writeup(?:</a>)?\s*\((?:<a[^>]+href=")?(https?://[^")<\s]+)',
@@ -38,6 +41,12 @@ def parse_args() -> argparse.Namespace:
         "--target-source",
         choices=("ctftime", "original", "both"),
         default="ctftime",
+    )
+    parser.add_argument(
+        "--max-concurrency",
+        type=int,
+        default=3,
+        help="Maximum number of parallel detail-page fetches when resolving original URLs.",
     )
     parser.add_argument("--output-txt", required=True)
     parser.add_argument("--output-jsonl", default=None)
@@ -66,16 +75,14 @@ def main() -> int:
     target_urls: list[str] = []
     seen_targets: set[str] = set()
 
-    for index, writeup_url in enumerate(writeup_urls, start=1):
-        row: dict[str, Any] = {
-            "index": index,
-            "ctftime_writeup_url": writeup_url,
-            "original_url": None,
-        }
-        if args.include_original:
-            html = fetch_text(client, writeup_url)
-            row["original_url"] = extract_original_writeup_url(html)
-        rows.append(row)
+    rows = build_rows(
+        client=client,
+        writeup_urls=writeup_urls,
+        include_original=args.include_original,
+        max_concurrency=args.max_concurrency,
+    )
+
+    for row in rows:
         for target_url in select_target_urls(row, args.target_source):
             if target_url not in seen_targets:
                 seen_targets.add(target_url)
@@ -94,6 +101,7 @@ def main() -> int:
                 "max_pages": args.max_pages,
                 "writeup_pages": len(rows),
                 "target_urls": len(target_urls),
+                "original_errors": sum(1 for row in rows if row.get("original_error")),
                 "output_txt": str(txt_path),
                 "output_jsonl": str(jsonl_path) if jsonl_path else None,
                 "target_source": args.target_source,
@@ -115,16 +123,76 @@ def build_http_client():
         return ("urllib", urllib.request)
 
 
-def fetch_text(client: tuple[str, Any], url: str) -> str:
+def fetch_text(client: tuple[str, Any], url: str, *, attempts: int = 4) -> str:
     mode, module = client
-    if mode == "requests":
-        response = module.get(url, timeout=30, headers={"User-Agent": DEFAULT_USER_AGENT})
-        response.raise_for_status()
-        return response.text
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            if mode == "requests":
+                response = module.get(url, timeout=30, headers={"User-Agent": DEFAULT_USER_AGENT})
+                if response.status_code in RETRYABLE_STATUS_CODES and attempt < attempts:
+                    time.sleep(attempt)
+                    continue
+                response.raise_for_status()
+                return response.text
 
-    request = module.Request(url, headers={"User-Agent": DEFAULT_USER_AGENT})
-    with module.urlopen(request, timeout=30) as response:
-        return response.read().decode("utf-8", errors="replace")
+            request = module.Request(url, headers={"User-Agent": DEFAULT_USER_AGENT})
+            with module.urlopen(request, timeout=30) as response:
+                return response.read().decode("utf-8", errors="replace")
+        except Exception as exc:
+            last_error = exc
+            status_code = getattr(exc, "code", None)
+            if status_code in RETRYABLE_STATUS_CODES and attempt < attempts:
+                time.sleep(attempt)
+                continue
+            raise
+    assert last_error is not None
+    raise last_error
+
+
+def build_rows(
+    *,
+    client: tuple[str, Any],
+    writeup_urls: list[str],
+    include_original: bool,
+    max_concurrency: int,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = [
+        {
+            "index": index,
+            "ctftime_writeup_url": writeup_url,
+            "original_url": None,
+            "original_error": None,
+        }
+        for index, writeup_url in enumerate(writeup_urls, start=1)
+    ]
+    if not include_original or not rows:
+        return rows
+
+    max_workers = max(1, min(max_concurrency, len(rows)))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_index = {
+            executor.submit(resolve_original_url, client, row["ctftime_writeup_url"]): row["index"]
+            for row in rows
+        }
+        for future in concurrent.futures.as_completed(future_to_index):
+            row_index = future_to_index[future] - 1
+            rows[row_index].update(future.result())
+    return rows
+
+
+def resolve_original_url(client: tuple[str, Any], writeup_url: str) -> dict[str, Any]:
+    try:
+        html = fetch_text(client, writeup_url)
+    except Exception as exc:
+        return {
+            "original_url": None,
+            "original_error": f"{type(exc).__name__}: {exc}",
+        }
+    return {
+        "original_url": extract_original_writeup_url(html),
+        "original_error": None,
+    }
 
 
 def enumerate_ctftime_writeup_pages(

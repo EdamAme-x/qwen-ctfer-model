@@ -210,6 +210,8 @@ __marimo__/
 # Local notes
 TODO.md
 .agents/
+.tmp*/
+*.tmp
 
 # Project data and outputs
 data/raw/scraped/*

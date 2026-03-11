@@ -1,0 +1,19 @@
+{
+  "model_name_or_path": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "adapter_path": "outputs/checkpoints/qwen-ctfer",
+  "revision": null,
+  "trust_remote_code": false,
+  "torch_dtype": "bfloat16",
+  "device_map": "auto",
+  "attn_implementation": null,
+  "default_system_prompt": "You are a CTF assistant working in an authorized sandbox. Be concise, evidence-first, and technical.",
+  "cases_path": "data/eval/example_cases.jsonl",
+  "report_path": "outputs/reports/qwen_ctfer_eval.json",
+  "generation": {
+    "max_new_tokens": 256,
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "do_sample": false,
+    "repetition_penalty": 1.0
+  }
+}

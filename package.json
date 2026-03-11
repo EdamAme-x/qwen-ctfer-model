@@ -10,6 +10,8 @@
     "smoke": "python scripts/run_smoke_pipeline.py",
     "list-ctftime-writeups": "python scripts/list_ctftime_writeups.py",
     "scrape-writeups": "python scripts/scrape_writeups.py",
-    "prepare-scrape-review": "python scripts/prepare_scrape_review.py"
+    "prepare-scrape-review": "python scripts/prepare_scrape_review.py",
+    "transform-scraped-writeups": "python scripts/transform_scraped_writeups.py",
+    "build-writeup-dataset": "python scripts/build_writeup_dataset.py"
   }
 }

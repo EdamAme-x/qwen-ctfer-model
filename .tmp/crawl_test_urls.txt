@@ -1,3 +1,0 @@
-﻿https://example.com
-https://ctftime.org/writeup/40681
-https://ctftime.org/writeup/40679
